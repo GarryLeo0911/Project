@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Map.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Map.java</span></div><h1>Map.java</h1><pre class="source lang-java linenums">package WizardTD;
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
+public class Map {
+    private String file_path;
+    private  ArrayList&lt;String&gt; raw_map_data;
+<span class="fc" id="L9">    public ArrayList&lt;ArrayList&lt;Character&gt;&gt; processed_map_data = new ArrayList&lt;&gt;();</span>
+    public double rotate_angle;
+
+    private App app;
+
+
+<span class="fc" id="L15">    public Map(String file_path, App app){</span>
+<span class="fc" id="L16">        this.file_path = file_path;</span>
+<span class="fc" id="L17">        this.app = app;</span>
+<span class="fc" id="L18">        raw_map_data = raw_data(file_path);</span>
+<span class="fc" id="L19">        processed_map_data = processed_ArrayList(raw_map_data);</span>
+<span class="fc" id="L20">    }</span>
+
+
+
+
+    //make a method to read the file
+    public ArrayList&lt;String&gt; raw_data(String file_path){
+<span class="fc" id="L27">        ArrayList&lt;String&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">        try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {</span>
+            String line;
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            while ((line = br.readLine()) != null) {</span>
+<span class="fc" id="L31">                lines.add(line);</span>
+            }
+<span class="nc" id="L33">        } catch (IOException e) {</span>
+<span class="nc" id="L34">            e.printStackTrace();</span>
+<span class="fc" id="L35">        }</span>
+<span class="fc" id="L36">        return lines;</span>
+    }
+
+
+    //make a method to split the string into arrays
+    public ArrayList&lt;ArrayList&lt;Character&gt;&gt; processed_ArrayList(ArrayList&lt;String&gt; raw_map_data){
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        for(int i = 0; i &lt; raw_map_data.size(); i++){</span>
+<span class="fc" id="L43">            ArrayList&lt;Character&gt; line_data = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            for (char c : raw_map_data.get(i).toCharArray()) {</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                if (c == ' ') {</span>
+<span class="fc" id="L46">                    line_data.add(' '); // Represent spaces as grass</span>
+                } else {
+<span class="fc" id="L48">                    line_data.add(c); // Keep 'X' or other characters for the path</span>
+                }
+            }
+<span class="fc" id="L51">            processed_map_data.add(line_data);</span>
+        }
+<span class="fc" id="L53">        return processed_map_data;</span>
+    }
+    
+
+    //make a function to tell me the angle of the image I should rotate
+    public double rotate_angle(int y, int x) {
+<span class="fc" id="L59">        double angle = 0;</span>
+    
+<span class="fc bfc" id="L61" title="All 4 branches covered.">        boolean isNorth = y &gt; 0 &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;);</span>
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        boolean isSouth = y &lt; processed_map_data.size() - 1 &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;);</span>
+<span class="fc bfc" id="L63" title="All 4 branches covered.">        boolean isEast = x &lt; processed_map_data.get(0).size() - 1 &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;);</span>
+<span class="fc bfc" id="L64" title="All 4 branches covered.">        boolean isWest = x &gt; 0 &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;);</span>
+    
+<span class="fc bfc" id="L66" title="All 8 branches covered.">        if (isNorth &amp;&amp; isSouth &amp;&amp; isEast &amp;&amp; isWest) {</span>
+<span class="fc" id="L67">            angle = 0;</span>
+<span class="fc bfc" id="L68" title="All 6 branches covered.">        } else if (isNorth &amp;&amp; isSouth &amp;&amp; isEast) {</span>
+<span class="fc" id="L69">            angle = 270;</span>
+<span class="fc bfc" id="L70" title="All 6 branches covered.">        } else if (isNorth &amp;&amp; isWest &amp;&amp; isEast) {</span>
+<span class="fc" id="L71">            angle = 180;</span>
+<span class="fc bfc" id="L72" title="All 6 branches covered.">        } else if (isNorth &amp;&amp; isSouth &amp;&amp; isWest) {</span>
+<span class="fc" id="L73">            angle = 90;</span>
+<span class="fc bfc" id="L74" title="All 6 branches covered.">        } else if (isEast &amp;&amp; isWest &amp;&amp; isSouth) {</span>
+<span class="fc" id="L75">            angle = 0;</span>
+<span class="fc bfc" id="L76" title="All 4 branches covered.">        } else if (isNorth &amp;&amp; isSouth) {</span>
+<span class="fc" id="L77">            angle = 90;</span>
+<span class="fc bfc" id="L78" title="All 4 branches covered.">        } else if (isEast &amp;&amp; isNorth) {</span>
+<span class="fc" id="L79">            angle = 180;</span>
+<span class="fc bfc" id="L80" title="All 4 branches covered.">        } else if (isEast &amp;&amp; isSouth) {</span>
+<span class="fc" id="L81">            angle = 270;</span>
+<span class="fc bfc" id="L82" title="All 4 branches covered.">        } else if (isWest &amp;&amp; isNorth) {</span>
+<span class="fc" id="L83">            angle = 90;</span>
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        } else if (isWest &amp;&amp; isSouth) {</span>
+<span class="fc" id="L85">            angle = 0;</span>
+<span class="pc bpc" id="L86" title="1 of 4 branches missed.">        } else if (isNorth &amp;&amp; !isSouth) {</span>
+<span class="fc" id="L87">            angle = 90;</span>
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">        } else if (isSouth &amp;&amp; !isNorth) {</span>
+<span class="fc" id="L89">            angle = 270;</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">        } else if (isEast &amp;&amp; !isWest) {</span>
+<span class="fc" id="L91">            angle = 0;</span>
+<span class="pc bpc" id="L92" title="1 of 4 branches missed.">        } else if (isWest &amp;&amp; !isEast) {</span>
+<span class="fc" id="L93">            angle = 180;</span>
+        }
+    
+<span class="fc" id="L96">        return angle;</span>
+    }
+
+
+    //make a function to tell me which type of path I should use
+    public PImage choose_path_type(int y, int x){
+<span class="pc bpc" id="L102" title="3 of 8 branches missed.">        if (y == 0 &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L103">            return app.straight_lane;</span>
+        }
+<span class="pc bpc" id="L105" title="3 of 8 branches missed.">        else if (y == 19 &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L106">            return app.straight_lane;</span>
+        }
+<span class="pc bpc" id="L108" title="3 of 8 branches missed.">        else if (x == 0 &amp;&amp; processed_map_data.get(y).get(x+1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L109">            return app.straight_lane;</span>
+        }
+<span class="pc bpc" id="L111" title="3 of 8 branches missed.">        else if (x == 19 &amp;&amp; processed_map_data.get(y).get(x-1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L112">            return app.straight_lane;</span>
+        }
+<span class="fc bfc" id="L114" title="All 8 branches covered.">        else if (processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;)) {</span>
+<span class="fc" id="L115">            return app.crossing_lane;</span>
+        }
+<span class="pc bpc" id="L117" title="1 of 8 branches missed.">        else if (processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L118">            return app.T_lane;</span>
+        }
+<span class="pc bpc" id="L120" title="1 of 8 branches missed.">        else if (processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L121">            return app.T_lane;</span>
+        }
+<span class="pc bpc" id="L123" title="1 of 8 branches missed.">        else if (processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L124">            return app.T_lane;</span>
+        }
+<span class="pc bpc" id="L126" title="1 of 8 branches missed.">        else if (processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L127">            return app.T_lane;</span>
+        }
+<span class="pc bpc" id="L129" title="2 of 8 branches missed.">        else if (processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L130">            return app.corner_lane;</span>
+        }
+<span class="pc bpc" id="L132" title="2 of 8 branches missed.">        else if (processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L133">            return app.corner_lane;</span>
+        }
+<span class="pc bpc" id="L135" title="2 of 8 branches missed.">        else if (processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L136">            return app.corner_lane;</span>
+        }
+<span class="pc bpc" id="L138" title="2 of 8 branches missed.">        else if (processed_map_data.get(y + 1).get(x).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y).get(x - 1).toString().equals(&quot;X&quot;) &amp;&amp; processed_map_data.get(y - 1).get(x).toString().equals(&quot;X&quot;) == false &amp;&amp; processed_map_data.get(y).get(x + 1).toString().equals(&quot;X&quot;) == false) {</span>
+<span class="fc" id="L139">            return app.corner_lane;</span>
+        }
+        else {
+<span class="fc" id="L142">            return app.straight_lane;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

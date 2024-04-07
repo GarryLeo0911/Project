@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wave.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Wave.java</span></div><h1>Wave.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import java.util.ArrayList;
+
+import processing.core.PApplet;
+
+public class Wave {
+    private JSONObject jsonData;
+    private JSONArray wave_Array;
+    private JSONObject wave;
+
+<span class="fc" id="L14">    private ArrayList&lt;Integer&gt; quantity_per_wave = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L15">    public ArrayList&lt;ArrayList&lt;Monster&gt;&gt; monsters = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L16">    public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; monster_per_wave_per_type = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L18">    public ArrayList&lt;Float&gt; duration_per_wave = new ArrayList&lt;&gt;();</span>
+    public float total_time;
+<span class="fc" id="L20">    public ArrayList&lt;Float&gt; pre_wave_pause = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L21">    public ArrayList&lt;float[]&gt; time_interval = new ArrayList&lt;&gt;();</span>
+
+    PApplet pApplet;
+    App app;
+    Monster monster;
+    int quantity;
+    float related_time;
+    float displayed_time;
+<span class="fc" id="L29">    public ArrayList&lt;float[]&gt; displaying_time_interval = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L31">    public Wave(JSONObject jsonData, App app, PApplet pApplet) {</span>
+<span class="fc" id="L32">        this.jsonData = jsonData;</span>
+<span class="fc" id="L33">        this.app = app;</span>
+<span class="fc" id="L34">        this.pApplet = pApplet;</span>
+<span class="fc" id="L35">        wave_Array = jsonData.getJSONArray(&quot;waves&quot;);</span>
+<span class="fc" id="L36">        monsters = getMonsters();</span>
+<span class="fc" id="L37">        quantity_per_wave = get_total_quantity_ArrayList();</span>
+<span class="fc" id="L38">        monster_per_wave_per_type = get_monsters_quantity_per_type();</span>
+        
+<span class="fc" id="L40">        duration_per_wave = get_time_per_wave();</span>
+<span class="fc" id="L41">        pre_wave_pause = get_pre_wave_pause();</span>
+<span class="fc" id="L42">        total_time = get_total_time();</span>
+<span class="fc" id="L43">        time_interval = get_time_interval();</span>
+<span class="fc" id="L44">        related_time = 0;</span>
+<span class="fc" id="L45">        displayed_time = 0;</span>
+<span class="fc" id="L46">        displaying_time_interval = get_displaying_time_interval();</span>
+<span class="fc" id="L47">    }</span>
+    
+    
+
+
+    public ArrayList&lt;ArrayList&lt;Monster&gt;&gt; getMonsters() {
+<span class="fc" id="L53">        JSONArray waves_array = jsonData.getJSONArray(&quot;waves&quot;);</span>
+<span class="fc" id="L54">        ArrayList&lt;ArrayList&lt;Monster&gt;&gt; monster_temporary = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        for (int i=0; i&lt;waves_array.size(); i++) {</span>
+<span class="fc" id="L56">            JSONArray monsters_array = waves_array.getJSONObject(i).getJSONArray(&quot;monsters&quot;);</span>
+<span class="fc" id="L57">            ArrayList&lt;Monster&gt; monsters_in_wave = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            for (int j=0; j&lt;monsters_array.size(); j++){</span>
+<span class="fc" id="L59">                int monster_quantity = monsters_array.getJSONObject(j).getInt(&quot;quantity&quot;);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                for (int k=0; k&lt;monster_quantity; k++) {</span>
+<span class="fc" id="L61">                    monsters_in_wave.add(new Monster(monsters_array.getJSONObject(j), app, pApplet));</span>
+                }
+            }
+<span class="fc" id="L64">            monster_temporary.add(monsters_in_wave);</span>
+        }
+<span class="fc" id="L66">        return monster_temporary;</span>
+    }
+
+    public ArrayList&lt;Integer&gt; get_total_quantity_ArrayList() {
+<span class="fc" id="L70">        JSONArray waves_array = jsonData.getJSONArray(&quot;waves&quot;);</span>
+        //loop for per wave
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (int i=0; i&lt;waves_array.size(); i++) {</span>
+<span class="fc" id="L73">            wave = waves_array.getJSONObject(i);</span>
+<span class="fc" id="L74">            JSONArray monsters_array = wave.getJSONArray(&quot;monsters&quot;);</span>
+            
+<span class="fc" id="L76">            int quantity_one_wave = 0;</span>
+            //loop for per type of monster
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            for (int j=0; j&lt;monsters_array.size(); j++) {</span>
+<span class="fc" id="L79">                JSONObject monster_Object = monsters_array.getJSONObject(j);</span>
+<span class="fc" id="L80">                int quantity_such_type = monster_Object.getInt(&quot;quantity&quot;);</span>
+<span class="fc" id="L81">                quantity_one_wave += quantity_such_type;</span>
+            }
+<span class="fc" id="L83">            quantity_per_wave.add(quantity_one_wave);</span>
+        }
+<span class="fc" id="L85">        return quantity_per_wave;</span>
+    }
+
+    public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; get_monsters_quantity_per_type() {
+        //loop for per wave
+<span class="fc" id="L90">        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; monsters_in_wave = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size(); i++) {</span>
+<span class="fc" id="L92">            wave = wave_Array.getJSONObject(i);</span>
+<span class="fc" id="L93">            JSONArray monsters_array = wave.getJSONArray(&quot;monsters&quot;);</span>
+            //loop for per type of monster
+<span class="fc" id="L95">            ArrayList&lt;Integer&gt; monsters_quantity_per_type = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            for (int j=0; j&lt;monsters_array.size(); j++) {</span>
+<span class="fc" id="L97">                JSONObject monster_Object = monsters_array.getJSONObject(j);</span>
+<span class="fc" id="L98">                int quantity_such_type = monster_Object.getInt(&quot;quantity&quot;);</span>
+<span class="fc" id="L99">                monsters_quantity_per_type.add(quantity_such_type);</span>
+            }
+<span class="fc" id="L101">            monsters_in_wave.add(monsters_quantity_per_type);</span>
+        }
+<span class="fc" id="L103">        return monsters_in_wave;</span>
+    }
+
+    public ArrayList&lt;Float&gt; get_time_per_wave() {
+        //loop for per wave
+<span class="fc" id="L108">        ArrayList&lt;Float&gt; duration_per_wave1 = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size(); i++) {</span>
+<span class="fc" id="L110">            wave = wave_Array.getJSONObject(i);</span>
+<span class="fc" id="L111">            float time_one_wave = wave.getFloat(&quot;duration&quot;);</span>
+<span class="fc" id="L112">            duration_per_wave1.add(time_one_wave);</span>
+        }
+<span class="fc" id="L114">        return duration_per_wave1;</span>
+    }
+
+    public float get_total_time() {
+<span class="fc" id="L118">        float total_time1 = 0;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size(); i++) {</span>
+<span class="fc" id="L120">            total_time1 += duration_per_wave.get(i);</span>
+<span class="fc" id="L121">            total_time1 += pre_wave_pause.get(i);</span>
+        }
+<span class="fc" id="L123">        return total_time1;</span>
+    }
+
+    public ArrayList&lt;Float&gt; get_pre_wave_pause() {
+<span class="fc" id="L127">        ArrayList&lt;Float&gt; pre_wave_pause1 = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size(); i++) {</span>
+<span class="fc" id="L129">            wave = wave_Array.getJSONObject(i);</span>
+<span class="fc" id="L130">            float wave_pause = wave.getFloat(&quot;pre_wave_pause&quot;);</span>
+<span class="fc" id="L131">            pre_wave_pause1.add(wave_pause);</span>
+        }
+<span class="fc" id="L133">        return pre_wave_pause1;</span>
+    }
+
+    //make a method to tell me the time interval of each wave
+    public ArrayList&lt;float[]&gt; get_time_interval() {
+<span class="fc" id="L138">        ArrayList&lt;float[]&gt; time_interval = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L139">        float start_time = 0;</span>
+<span class="fc" id="L140">        float end_time =0;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size(); i++) {</span>
+<span class="fc" id="L142">            start_time = end_time + pre_wave_pause.get(i);</span>
+<span class="fc" id="L143">            end_time += pre_wave_pause.get(i) + duration_per_wave.get(i);</span>
+<span class="fc" id="L144">            float[] time_interval_one_wave = {start_time, end_time};</span>
+<span class="fc" id="L145">            time_interval.add(time_interval_one_wave);</span>
+        }
+<span class="fc" id="L147">        return time_interval;</span>
+    }
+
+    //make a method to tell me whether the time is in the interval
+    public boolean check_time_in_interval(float time) {
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (int i=0; i&lt;time_interval.size(); i++) {</span>
+<span class="fc bfc" id="L153" title="All 4 branches covered.">            if (time &gt;= time_interval.get(i)[0] &amp;&amp; time &lt;= time_interval.get(i)[1]) {</span>
+<span class="fc" id="L154">                return true;</span>
+            }
+        }
+<span class="fc" id="L157">        return false;</span>
+    }
+
+    //make a method to tell me which wave's monster I should generate
+    public int get_wave_index(float time) {
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (check_time_in_interval(time) == true) {</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            for (int i=0; i&lt;time_interval.size(); i++) {</span>
+<span class="pc bpc" id="L164" title="2 of 4 branches missed.">                if (time &gt;= time_interval.get(i)[0] &amp;&amp; time &lt;= time_interval.get(i)[1]) {</span>
+<span class="fc" id="L165">                    return i;</span>
+                }
+            }
+        }
+<span class="fc" id="L169">        return -1;</span>
+    }
+
+    //get the the displaying time interval
+    public ArrayList&lt;float[]&gt; get_displaying_time_interval() {
+<span class="fc" id="L174">        ArrayList&lt;float[]&gt; time_interval1 = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L175">        float start_time = 0;</span>
+<span class="fc" id="L176">        float end_time =0;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        for (int i=0; i&lt;wave_Array.size()-1; i++) {</span>
+<span class="fc" id="L178">            start_time = end_time;</span>
+<span class="fc" id="L179">            end_time += duration_per_wave.get(i) + pre_wave_pause.get(i+1);</span>
+<span class="fc" id="L180">            float[] time_interval_one_wave = {start_time, end_time};</span>
+<span class="fc" id="L181">            time_interval1.add(time_interval_one_wave);</span>
+        }
+<span class="fc" id="L183">        return time_interval1;</span>
+    }
+
+    //check the time is in the displaying time interval
+    public boolean check_time_in_displaying_interval(float time) {
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        for (int i=0; i&lt;displaying_time_interval.size(); i++) {</span>
+<span class="fc bfc" id="L189" title="All 4 branches covered.">            if (time &gt;= displaying_time_interval.get(i)[0] &amp;&amp; time &lt;= displaying_time_interval.get(i)[1]) {</span>
+<span class="fc" id="L190">                return true;</span>
+            }
+        }
+<span class="fc" id="L193">        return false;</span>
+    }
+
+    //get the the displaying time interval
+    public int get_displaying_wave_index(float time) {
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (check_time_in_displaying_interval(time) == true) {</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">            for (int i=0; i&lt;displaying_time_interval.size(); i++) {</span>
+<span class="pc bpc" id="L200" title="2 of 4 branches missed.">                if (time &gt;= displaying_time_interval.get(i)[0] &amp;&amp; time &lt;= displaying_time_interval.get(i)[1]) {</span>
+<span class="fc" id="L201">                    return i;</span>
+                }
+            }
+        }
+<span class="fc" id="L205">        return displaying_time_interval.size();</span>
+    }
+    
+
+    //make a method to display the current wave and time
+    public void display_wave_time(int current_wave, int start_time) {
+<span class="fc" id="L211">        app.fill(0);</span>
+<span class="fc" id="L212">        app.textSize(30);</span>
+<span class="fc" id="L213">        String wave_time = &quot;Wave &quot; + (current_wave + 1) + &quot; Time: &quot; + (int) (start_time);</span>
+<span class="fc" id="L214">        app.text(wave_time, 10, 30);</span>
+<span class="fc" id="L215">    }</span>
+
+
+    public void display_monster_in_wave(ArrayList&lt;ArrayList&lt;Monster&gt;&gt; monsters, float time_in_second, boolean pressed_speed_up_button) {
+<span class="fc" id="L219">        float current_time = time_in_second;</span>
+<span class="fc" id="L220">        int current_wave = get_wave_index(current_time);</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        for (int i=0; i&lt;time_interval.size(); i++) {</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            if (current_time == (int) (time_interval.get(i)[0])) {</span>
+<span class="fc" id="L223">                related_time = 0;</span>
+            }
+        }
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        for (int i=0; i&lt;displaying_time_interval.size(); i++) {</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            if (current_time == (int) (displaying_time_interval.get(i)[0])) {</span>
+<span class="fc" id="L228">                displayed_time = 0;</span>
+            }
+        }
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (check_time_in_interval(current_time) == true) {</span>
+<span class="fc" id="L232">            float monster_spawn_interval = duration_per_wave.get(current_wave) / quantity_per_wave.get(current_wave);</span>
+<span class="fc" id="L233">            int monster_index = (int) (related_time / monster_spawn_interval);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">            if (monster_index &lt; monsters.get(current_wave).size()) {</span>
+<span class="fc" id="L235">                monsters.get(current_wave).get(monster_index).setWhether_spawn_monster();</span>
+            }
+        }
+
+<span class="fc" id="L239">        int displaying_wave_index = get_displaying_wave_index(current_time);</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">        if (!pressed_speed_up_button) {</span>
+<span class="fc" id="L241">            related_time += 1.0f / 60;</span>
+<span class="fc" id="L242">            displayed_time += 1.0f / 60;</span>
+        } else {
+<span class="fc" id="L244">            related_time += 1.0f / 30;</span>
+<span class="fc" id="L245">            displayed_time += 1.0f / 30;</span>
+        }
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if (check_time_in_displaying_interval(current_time) == true) {</span>
+<span class="fc" id="L248">            float temporary_interval = displaying_time_interval.get(displaying_wave_index)[1] - displaying_time_interval.get(displaying_wave_index)[0];</span>
+<span class="fc" id="L249">            int displayed_time1 = (int) (temporary_interval - displayed_time);</span>
+<span class="fc" id="L250">            display_wave_time(displaying_wave_index, displayed_time1);</span>
+<span class="fc" id="L251">        } else {</span>
+<span class="nc" id="L252">            display_wave_time(displaying_wave_index, 0);</span>
+        }
+
+        
+<span class="fc" id="L256">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

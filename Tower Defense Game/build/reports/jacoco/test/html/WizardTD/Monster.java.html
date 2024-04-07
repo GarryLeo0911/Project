@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Monster.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Monster.java</span></div><h1>Monster.java</h1><pre class="source lang-java linenums">package WizardTD;
+import processing.core.PApplet;
+import processing.core.PImage;
+import java.util.*;
+
+import processing.data.JSONObject;
+
+public class Monster {
+    public PApplet pApplet;
+
+    private JSONObject monster;
+    private App app;
+    private String type;
+    private int max_hp;
+    public int hp;
+    private float speed;
+    private float armour;
+    public boolean reach_the_house;
+    public boolean be_freezed;
+    public int freezing_time;
+    int mana_gained_on_kill;
+    boolean monster_is_dead;
+    boolean whether_give_mana;
+    boolean subtract_mana;
+    //load the monster's image
+    PImage germlin;
+    PImage germlin1;
+    PImage germlin2;
+    PImage germlin3;
+    PImage germlin4;
+    PImage germlin5;
+    PImage worm;
+    PImage beetle;
+
+    //create variables represented the monster's spawan location
+    int startX;
+    int startY;
+    //create variables represented the monsters' spawn location
+<span class="fc" id="L39">    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; monster_spawn_location  = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L40">    ArrayList&lt;Integer&gt; monster_location = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L41">    ArrayList&lt;int[]&gt; path = new ArrayList&lt;&gt;();</span>
+
+    //create a 2D array to store the map
+    private char[][] mapArray;
+
+    //create two variables to store the house's location
+    int houseX;
+    int houseY;
+
+    //create two variables to store the monsters' location
+    private float monsterX;
+    private float monsterY;
+    private int currentPoint;
+
+    //set a variable to tell the monster whether to display
+<span class="fc" id="L56">    public boolean whether_spawn_monster=false;</span>
+
+    //set an ArrayList to store all the fireball will hit the monster
+    ArrayList&lt;Fireball&gt; upcoming_fireballs;
+
+    //make a vairable used to display the dying monster
+    public int dying_time;
+
+
+    // Constructor
+<span class="fc" id="L66">    public Monster(JSONObject monster, App app, PApplet pApplet) {</span>
+<span class="fc" id="L67">        this.monster = monster;</span>
+<span class="fc" id="L68">        this.app = app;</span>
+<span class="fc" id="L69">        this.pApplet = pApplet;</span>
+        //initiate the monster's attributes
+<span class="fc" id="L71">        type = monster.getString(&quot;type&quot;);</span>
+<span class="fc" id="L72">        max_hp = monster.getInt(&quot;hp&quot;);</span>
+<span class="fc" id="L73">        hp = max_hp;</span>
+<span class="fc" id="L74">        speed = monster.getFloat(&quot;speed&quot;);</span>
+<span class="fc" id="L75">        be_freezed = false;</span>
+<span class="fc" id="L76">        freezing_time = 180;</span>
+<span class="fc" id="L77">        armour = monster.getFloat(&quot;armour&quot;);</span>
+<span class="fc" id="L78">        mana_gained_on_kill = monster.getInt(&quot;mana_gained_on_kill&quot;);</span>
+        //load the image
+<span class="fc" id="L80">        germlin = app.gremlin;</span>
+<span class="fc" id="L81">        germlin1 = app.gremlin1;</span>
+<span class="fc" id="L82">        germlin2 = app.gremlin2;</span>
+<span class="fc" id="L83">        germlin3 = app.gremlin3;</span>
+<span class="fc" id="L84">        germlin4 = app.gremlin4;</span>
+<span class="fc" id="L85">        germlin5 = app.gremlin5;</span>
+<span class="fc" id="L86">        worm = app.worm;</span>
+<span class="fc" id="L87">        beetle = app.beetle;</span>
+        //initiate the monster's spawn location
+<span class="fc" id="L89">        monster_spawn_location = monster_spawn_location();</span>
+<span class="fc" id="L90">        monster_location = generate_monster();</span>
+        //initiate the map's condition
+<span class="fc" id="L92">        mapArray = getMapAsArray();</span>
+        //get the house's location
+<span class="fc" id="L94">        houseX = house_location()[0];</span>
+<span class="fc" id="L95">        houseY = house_location()[1];</span>
+        //initiate the monsters' spawn loaction
+<span class="fc" id="L97">        startX = monster_location.get(0);</span>
+<span class="fc" id="L98">        startY = monster_location.get(1);</span>
+
+        //initiate the monsters' location
+<span class="fc" id="L101">        monsterX = startX;</span>
+<span class="fc" id="L102">        monsterY = startY;</span>
+<span class="fc" id="L103">        currentPoint = 0;</span>
+<span class="fc" id="L104">        reach_the_house = false;</span>
+
+        //set the monster's route
+<span class="fc" id="L107">        path = findPath(startX, startY);</span>
+
+        //set the monster whether to display
+<span class="fc" id="L110">        whether_spawn_monster = false;</span>
+
+        //set the upcoming_fireballs
+<span class="fc" id="L113">        upcoming_fireballs = new ArrayList&lt;&gt;();</span>
+
+        //set the dying time
+<span class="fc" id="L116">        dying_time = 0;</span>
+<span class="fc" id="L117">        monster_is_dead = false;</span>
+<span class="fc" id="L118">        whether_give_mana = false;</span>
+<span class="fc" id="L119">        subtract_mana = false;</span>
+<span class="fc" id="L120">    }</span>
+
+    public void setWhether_give_mana(){
+<span class="fc" id="L123">        this.whether_give_mana = true;</span>
+<span class="fc" id="L124">    }</span>
+
+    public void setSubtract_mana(){
+<span class="fc" id="L127">        this.subtract_mana = false;</span>
+<span class="fc" id="L128">    }</span>
+
+    public void setWhether_spawn_monster(){
+<span class="fc" id="L131">        this.whether_spawn_monster = true;</span>
+<span class="fc" id="L132">    }</span>
+
+    public void setFreezing(){
+<span class="fc" id="L135">        be_freezed = true;</span>
+<span class="fc" id="L136">    }</span>
+
+    //create a method to add the fireball to the upcoming_fireballs
+    public void addFireball(Fireball fireball){
+<span class="fc" id="L140">        upcoming_fireballs.add(fireball);</span>
+<span class="fc" id="L141">    }</span>
+
+    public float getMonsterX(){
+<span class="fc" id="L144">        return monsterX;</span>
+    }
+
+    public float getMonsterY(){
+<span class="fc" id="L148">        return monsterY;</span>
+    }
+
+    public int getCurrentPoint(){
+<span class="fc" id="L152">        return currentPoint;</span>
+    }
+
+    public void setMonsterX(float monsterX){
+<span class="fc" id="L156">        this.monsterX = monsterX;</span>
+<span class="fc" id="L157">    }</span>
+
+    public void setMonsterY(float monsterY){
+<span class="fc" id="L160">        this.monsterY = monsterY;</span>
+<span class="fc" id="L161">    }</span>
+
+    public void setCurrentPoint(int currentPoint){
+<span class="fc" id="L164">        this.currentPoint = currentPoint;</span>
+<span class="fc" id="L165">    }</span>
+
+    //create a method to tell me where can I spawn the monsters
+    public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; monster_spawn_location() {
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        for (int y = 0; y &lt; app.processed_map_data.size(); y++) {</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            for (int x = 0; x &lt; app.processed_map_data.get(y).size(); x++) {</span>
+<span class="fc" id="L171">                ArrayList&lt;Integer&gt; coordinate = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L172" title="All 4 branches covered.">                if (y == 0 &amp;&amp; app.processed_map_data.get(y).get(x) == 'X') {</span>
+<span class="fc" id="L173">                    coordinate.add(x);</span>
+<span class="fc" id="L174">                    coordinate.add(y);</span>
+<span class="fc" id="L175">                    monster_spawn_location.add(coordinate);</span>
+<span class="fc bfc" id="L176" title="All 4 branches covered.">                } else if (x == 0 &amp;&amp; app.processed_map_data.get(y).get(x) == 'X') {</span>
+<span class="fc" id="L177">                    coordinate.add(x);</span>
+<span class="fc" id="L178">                    coordinate.add(y);</span>
+<span class="fc" id="L179">                    monster_spawn_location.add(coordinate);</span>
+<span class="fc bfc" id="L180" title="All 4 branches covered.">                } else if (x == 19 &amp;&amp; app.processed_map_data.get(y).get(x) == 'X') {</span>
+<span class="fc" id="L181">                    coordinate.add(x);</span>
+<span class="fc" id="L182">                    coordinate.add(y);</span>
+<span class="fc" id="L183">                    monster_spawn_location.add(coordinate);</span>
+<span class="fc bfc" id="L184" title="All 4 branches covered.">                } else if (y == 19 &amp;&amp; app.processed_map_data.get(y).get(x) == 'X') {</span>
+<span class="fc" id="L185">                    coordinate.add(x);</span>
+<span class="fc" id="L186">                    coordinate.add(y);</span>
+<span class="fc" id="L187">                    monster_spawn_location.add(coordinate);</span>
+                }
+            }
+        }
+<span class="fc" id="L191">        return monster_spawn_location;</span>
+    }
+
+    //create a method to tell the program where to generate the monster
+    public ArrayList&lt;Integer&gt; generate_monster() {
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (!monster_spawn_location.isEmpty()) {</span>
+<span class="fc" id="L197">            Random random = new Random();</span>
+<span class="fc" id="L198">            int random_number = random.nextInt(monster_spawn_location.size());</span>
+<span class="fc" id="L199">            monster_location.add(monster_spawn_location.get(random_number).get(0));</span>
+<span class="fc" id="L200">            monster_location.add(monster_spawn_location.get(random_number).get(1));</span>
+<span class="fc" id="L201">            return monster_location;</span>
+        }
+<span class="fc" id="L203">        return null;</span>
+    }
+
+    //define a method to tell the program where is the house
+    public int[] house_location() {
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        for (int y = 0; y &lt; app.processed_map_data.size(); y++) {</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (int x = 0; x &lt; app.processed_map_data.get(y).size(); x++) {</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                if (app.processed_map_data.get(y).get(x) == 'W') {</span>
+<span class="fc" id="L211">                    houseX = x;</span>
+<span class="fc" id="L212">                    houseY = y;</span>
+                }
+            }
+        }
+<span class="fc" id="L216">        int[] house_location = new int[2];</span>
+<span class="fc" id="L217">        house_location[0] = houseX;</span>
+<span class="fc" id="L218">        house_location[1] = houseY;</span>
+<span class="fc" id="L219">        return house_location;</span>
+    }
+
+    //Begin to set the route for the monster
+    // Create a method to convert the processed_map_data ArrayList to a 2D char array.
+     public char[][] getMapAsArray() {
+<span class="fc" id="L225">        mapArray = new char[app.processed_map_data.size()][];</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        for (int i = 0; i &lt; app.processed_map_data.size(); i++) {</span>
+<span class="fc" id="L227">            ArrayList&lt;Character&gt; row = app.processed_map_data.get(i);</span>
+<span class="fc" id="L228">            mapArray[i] = new char[row.size()];</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            for (int j = 0; j &lt; row.size(); j++) {</span>
+<span class="fc" id="L230">                mapArray[i][j] = row.get(j);</span>
+            }
+        }
+<span class="fc" id="L233">        return mapArray;</span>
+    }
+    
+    //create a method to find the route for the monster
+    public ArrayList&lt;int[]&gt; findPath(int startX, int startY) {
+<span class="fc" id="L238">        boolean[][] visited = new boolean[20][20];</span>
+<span class="fc" id="L239">        ArrayList&lt;int[]&gt; path = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">        if (depthFirstSearch(startX, startY, visited, path)){</span>
+<span class="fc" id="L241">            return path;</span>
+        } else {
+<span class="fc" id="L243">            return null;</span>
+        }
+    }
+
+    //create a method for depth first search
+    public boolean depthFirstSearch(int startX, int startY, boolean[][] visited, ArrayList&lt;int[]&gt; path) {
+<span class="fc bfc" id="L249" title="All 10 branches covered.">        if (startX&lt;0 || startY&lt;0 || startX&gt;=mapArray.length || startY&gt;=mapArray[0].length || visited[startY][startX]) {</span>
+<span class="fc" id="L250">            return false;</span>
+        }
+
+<span class="fc" id="L253">        visited[startY][startX]=true;</span>
+<span class="fc" id="L254">        path.add(new int[]{startX, startY});</span>
+
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        if (mapArray[startY][startX]=='W') {</span>
+<span class="fc" id="L257">            return true;</span>
+        }
+
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        if (mapArray[startY][startX]!='X') {</span>
+<span class="fc" id="L261">            path.remove(path.size()-1);</span>
+<span class="fc" id="L262">            return false;</span>
+        }
+
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if (depthFirstSearch(startX+1, startY, visited, path) ||</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            depthFirstSearch(startX-1, startY, visited, path) ||</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">            depthFirstSearch(startX, startY+1, visited, path) ||</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">            depthFirstSearch(startX, startY-1, visited, path)) {</span>
+<span class="fc" id="L269">            return true;</span>
+        }
+
+<span class="fc" id="L272">        path.remove(path.size()-1);</span>
+<span class="fc" id="L273">        return false;</span>
+    }
+
+    public void updateLocation(boolean pressed_speed_up_button) {
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        if (whether_spawn_monster) {</span>
+<span class="pc bpc" id="L278" title="2 of 6 branches missed.">            if (path != null &amp;&amp; path.size() &gt; 0 &amp;&amp; hp &gt; 0) {</span>
+<span class="pc bpc" id="L279" title="2 of 4 branches missed.">                if (currentPoint &gt;= 0 &amp;&amp; currentPoint &lt; path.size()) {</span>
+<span class="fc" id="L280">                    int targetX = path.get(currentPoint)[0];</span>
+<span class="fc" id="L281">                    int targetY = path.get(currentPoint)[1];</span>
+
+                    // Calculate the distance between the monster and the target
+<span class="fc" id="L284">                    float dx = targetX - monsterX;</span>
+<span class="fc" id="L285">                    float dy = targetY - monsterY;</span>
+<span class="fc" id="L286">                    float distance = (float) Math.sqrt(dx * dx + dy * dy);</span>
+
+                    // Check if the monster has reached the target cell
+<span class="fc bfc" id="L289" title="All 2 branches covered.">                    if (distance &lt; 0.1) {</span>
+<span class="fc" id="L290">                        currentPoint++;  // Move to the next target</span>
+                    } else {
+                        float moveX;
+                        float moveY;
+<span class="fc bfc" id="L294" title="All 2 branches covered.">                        if (!pressed_speed_up_button) {</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">                            if (be_freezed == false) {</span>
+<span class="fc" id="L296">                                moveX = (dx / (distance * 32)) * speed;</span>
+<span class="fc" id="L297">                                moveY = (dy / (distance * 32)) * speed;</span>
+<span class="fc" id="L298">                                freezing_time = 180;</span>
+                            } else {
+<span class="fc" id="L300">                                moveX = (dx / (distance * 32)) * speed / 2;</span>
+<span class="fc" id="L301">                                moveY = (dy / (distance * 32)) * speed / 2;</span>
+<span class="fc" id="L302">                                freezing_time -= 1;</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                                if (freezing_time == 0) {</span>
+<span class="fc" id="L304">                                    be_freezed = false;</span>
+                                }
+                            }
+                        } else {
+<span class="fc bfc" id="L308" title="All 2 branches covered.">                            if (be_freezed == false) {</span>
+<span class="fc" id="L309">                                moveX = (dx / (distance * 32)) * speed * 2;</span>
+<span class="fc" id="L310">                                moveY = (dy / (distance * 32)) * speed * 2;</span>
+<span class="fc" id="L311">                                freezing_time = 180;</span>
+                            } else {
+<span class="fc" id="L313">                                moveX = (dx / (distance * 32)) * speed;</span>
+<span class="fc" id="L314">                                moveY = (dy / (distance * 32)) * speed;</span>
+<span class="fc" id="L315">                                freezing_time -= 1;</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">                                if (freezing_time == 0) {</span>
+<span class="nc" id="L317">                                    be_freezed = false;</span>
+                                }
+                            }
+                        }
+<span class="fc" id="L321">                        monsterX += moveX;</span>
+<span class="fc" id="L322">                        monsterY += moveY;</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L327">    }</span>
+
+    //draw the hp bar for the monster
+    public void display_monster_hp() {
+<span class="fc" id="L331">        pApplet.fill(0);</span>
+<span class="fc" id="L332">        pApplet.rect(monsterX*32 + 2, monsterY*32 + 35, 28, 5);</span>
+<span class="fc" id="L333">        pApplet.fill(255, 0, 0);</span>
+<span class="fc" id="L334">        pApplet.rect(monsterX*32 + 2, monsterY*32 + 35, 28 * hp / max_hp, 5);</span>
+<span class="fc" id="L335">    }</span>
+
+    //make a method used to display the dying monster
+    public void display_dying_monster() {
+<span class="pc bpc" id="L339" title="1 of 4 branches missed.">        if (dying_time &gt;= 0 &amp;&amp; dying_time &lt; 4) {</span>
+<span class="fc" id="L340">            pApplet.image(germlin1, monsterX*32, monsterY*32 + 40, 32, 32);</span>
+        }
+<span class="fc bfc" id="L342" title="All 4 branches covered.">        if (dying_time &gt;= 4 &amp;&amp; dying_time &lt; 8) {</span>
+<span class="fc" id="L343">            pApplet.image(germlin2, monsterX*32, monsterY*32 + 40, 32, 32);</span>
+        }
+<span class="fc bfc" id="L345" title="All 4 branches covered.">        if (dying_time &gt;= 8 &amp;&amp; dying_time &lt; 12) {</span>
+<span class="fc" id="L346">            pApplet.image(germlin3, monsterX*32, monsterY*32 + 40, 32, 32);</span>
+        }
+<span class="fc bfc" id="L348" title="All 4 branches covered.">        if (dying_time &gt;= 12 &amp;&amp; dying_time &lt; 16) {</span>
+<span class="fc" id="L349">            pApplet.image(germlin4, monsterX*32, monsterY*32 + 40, 32, 32);</span>
+        }
+<span class="fc bfc" id="L351" title="All 4 branches covered.">        if (dying_time &gt;= 16 &amp;&amp; dying_time &lt; 20) {</span>
+<span class="fc" id="L352">            pApplet.image(germlin5, monsterX*32, monsterY*32 + 40, 32, 32);</span>
+        }
+
+<span class="fc" id="L355">        dying_time++;</span>
+<span class="fc" id="L356">    }</span>
+
+    public void display(boolean pressed_pause_button, boolean pressed_speed_up_button) {
+<span class="fc" id="L359">        pApplet.noStroke();</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">        if (whether_spawn_monster) {</span>
+            // make the monster be hit by the fireball
+<span class="fc bfc" id="L362" title="All 2 branches covered.">            for (int i = 0; i &lt; upcoming_fireballs.size(); i++) {</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">                if (upcoming_fireballs.get(i).reachDestination) {</span>
+<span class="fc" id="L364">                    hp -= upcoming_fireballs.get(i).damage * armour;</span>
+<span class="pc bpc" id="L365" title="1 of 2 branches missed.">                    if (upcoming_fireballs.get(i).freezing_ball == true) {</span>
+<span class="nc" id="L366">                        setFreezing();</span>
+                    }
+<span class="fc" id="L368">                    upcoming_fireballs.remove(i);</span>
+                }
+            }
+
+            // Call the updateLocation method to update the monster's position
+<span class="pc bpc" id="L373" title="1 of 2 branches missed.">            if (!pressed_pause_button){</span>
+<span class="fc" id="L374">                updateLocation(pressed_speed_up_button);</span>
+            }
+
+            // Draw the monster at its updated position
+<span class="pc bpc" id="L378" title="2 of 4 branches missed.">            if (path != null &amp;&amp; path.size() &gt; 0) {</span>
+<span class="pc bpc" id="L379" title="2 of 6 branches missed.">                if (currentPoint &gt;= 0 &amp;&amp; currentPoint &lt; path.size() &amp;&amp; hp &gt; 0) {</span>
+                    // draw the moving monster
+<span class="fc" id="L381">                    pApplet.image(germlin, monsterX * 32, monsterY * 32 + 40, 32, 32);</span>
+<span class="fc" id="L382">                    display_monster_hp();</span>
+                }
+<span class="pc bpc" id="L384" title="2 of 6 branches missed.">                if (currentPoint &gt;= 0 &amp;&amp; currentPoint &lt; path.size() &amp;&amp; hp &lt;= 0) {</span>
+                    // draw the dying monster
+<span class="fc" id="L386">                    display_dying_monster();</span>
+                }
+            }
+<span class="fc" id="L389">            float dx = houseX - monsterX;</span>
+<span class="fc" id="L390">            float dy = houseY - monsterY;</span>
+<span class="fc" id="L391">            float distance = (float) Math.sqrt(dx * dx + dy * dy);</span>
+<span class="pc bpc" id="L392" title="1 of 4 branches missed.">            if (distance &lt; 0.1 &amp;&amp; hp &gt; 0) {</span>
+<span class="fc" id="L393">                reach_the_house = true;</span>
+<span class="fc" id="L394">                subtract_mana = true;</span>
+<span class="fc" id="L395">                monster_location = generate_monster();</span>
+<span class="fc" id="L396">                monsterX = monster_location.get(0);</span>
+<span class="fc" id="L397">                monsterY = monster_location.get(1);</span>
+<span class="fc" id="L398">                setCurrentPoint(0);</span>
+<span class="fc" id="L399">                path = findPath(monster_location.get(0), monster_location.get(1));</span>
+            } 
+        }
+<span class="fc" id="L402">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Bar.java</span></div><h1>Bar.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import org.checkerframework.checker.units.qual.s;
+
+import processing.core.PApplet;
+
+public class Bar {
+    private PApplet app; // Reference to the PApplet
+
+    // Create variables representing the size of the button
+    private int buttonSize;
+    private int xCoordinate;
+    private int x_intervalBetweenButtons;
+    private int y_intervalBetweenButtons;
+
+    //parameter for the speed button
+    private int speed_button_yCoordinate;
+
+    //parameter for the pause button
+    private int pause_button_yCoordinate;
+
+    //parameter for the build_tower_button
+    private int build_tower_button_yCoordinate;
+
+    //parameter for upgrade_range_button
+    private int upgrade_range_button_yCoordinate;
+
+    //parameter for upgrade_speed_button
+    private int upgrade_speed_button_yCoordinate;
+
+    //parameter for upgrade_damage_button
+    private int upgrade_damage_button_yCoordinate;
+
+    //parameter for mana_pool_button
+    private int mana_pool_button_yCoordinate;
+
+    //parameter for freezing_button
+    private int freezing_button_yCoordinate;
+
+    public int mouseX;
+    public int mouseY;
+
+    //check whether press the button
+    boolean pressed_speed_up_button;
+    boolean pressed_pause_button;
+    boolean pressed_Build_button;
+    boolean pressed_upgrade_range_button;
+    boolean pressed_upgrade_speed_button;
+    boolean pressed_upgrade_damage_button;
+    boolean pressed_mana_pool_button;
+    boolean pressed_freeze_button;
+
+    //Convenient to test
+    boolean speed_up_button_color_change;
+    boolean pause_button_color_change;
+    boolean build_tower_button_color_change;
+    boolean upgrade_range_button_color_change;
+    boolean upgrade_speed_button_color_change;
+    boolean upgrade_damage_button_color_change;
+    boolean mana_pool_button_color_change;
+    boolean freezing_button_color_change;
+
+<span class="fc" id="L63">    public Bar(PApplet app, int mouseX, int mouseY, boolean mousePressed, boolean pressed_speed_up_button, boolean pressed_pause_button, boolean pressed_Build_button, boolean pressed_upgrade_range_button, boolean pressed_upgrade_speed_button, boolean pressed_upgrade_damage_button, boolean pressed_mana_pool_button) {</span>
+<span class="fc" id="L64">        this.app = app ;</span>
+<span class="fc" id="L65">        buttonSize = 50;</span>
+<span class="fc" id="L66">        x_intervalBetweenButtons = 10;</span>
+<span class="fc" id="L67">        y_intervalBetweenButtons = 14;</span>
+<span class="fc" id="L68">        xCoordinate = 640 + x_intervalBetweenButtons;</span>
+
+        // Set the y coordinate of the speed button
+<span class="fc" id="L71">        speed_button_yCoordinate = 40 + (y_intervalBetweenButtons/2);</span>
+
+        // Set the y coordinate of the pause button
+<span class="fc" id="L74">        pause_button_yCoordinate = speed_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        // Set the y coordinate of the build_tower button
+<span class="fc" id="L77">        build_tower_button_yCoordinate = pause_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+        
+        //set the y coordinate of the upgrade_range_button
+<span class="fc" id="L80">        upgrade_range_button_yCoordinate = build_tower_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        //set the y coordinate of the upgrade_speed_button
+<span class="fc" id="L83">        upgrade_speed_button_yCoordinate = upgrade_range_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        //set the y coordinate of the upgrade_damage_button
+<span class="fc" id="L86">        upgrade_damage_button_yCoordinate = upgrade_speed_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        //set the y coordinate of the mana_pool_button
+<span class="fc" id="L89">        mana_pool_button_yCoordinate = upgrade_damage_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        //set the y coordinate of the freezing_button
+<span class="fc" id="L92">        freezing_button_yCoordinate = mana_pool_button_yCoordinate + y_intervalBetweenButtons + buttonSize;</span>
+
+        //initiate the boolean variable
+<span class="fc" id="L95">        this.pressed_speed_up_button = pressed_speed_up_button;</span>
+<span class="fc" id="L96">        this.pressed_pause_button = pressed_pause_button;</span>
+<span class="fc" id="L97">        this.pressed_Build_button = pressed_Build_button;</span>
+<span class="fc" id="L98">        this.pressed_upgrade_range_button = pressed_upgrade_range_button;</span>
+<span class="fc" id="L99">        this.pressed_upgrade_speed_button = pressed_upgrade_speed_button;</span>
+<span class="fc" id="L100">        this.pressed_upgrade_damage_button = pressed_upgrade_damage_button;</span>
+<span class="fc" id="L101">        this.pressed_mana_pool_button = pressed_mana_pool_button;</span>
+
+        //initiate the boolean variable for color change
+<span class="fc" id="L104">        speed_up_button_color_change = false;</span>
+<span class="fc" id="L105">        pause_button_color_change = false;</span>
+<span class="fc" id="L106">        build_tower_button_color_change = false;</span>
+<span class="fc" id="L107">        upgrade_range_button_color_change = false;</span>
+<span class="fc" id="L108">        upgrade_speed_button_color_change = false;</span>
+<span class="fc" id="L109">        upgrade_damage_button_color_change = false;</span>
+<span class="fc" id="L110">        mana_pool_button_color_change = false;</span>
+<span class="fc" id="L111">        freezing_button_color_change = false;</span>
+<span class="fc" id="L112">    }</span>
+
+    public void setMouseX(int mouseX) {
+<span class="fc" id="L115">        this.mouseX = mouseX;</span>
+<span class="fc" id="L116">    }</span>
+
+    public void setMouseY(int mouseY) {
+<span class="fc" id="L119">        this.mouseY = mouseY;</span>
+<span class="fc" id="L120">    }</span>
+
+    public void drawSpeedButton(boolean pressed_speed_up_button) {
+        // Draw the speed button as a square using rect()
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (pressed_speed_up_button == false) {</span>
+<span class="fc" id="L125">            app.fill(0,191,255);</span>
+<span class="fc" id="L126">            app.rect(xCoordinate, speed_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L127">            speed_up_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L129">            app.fill(0,255,0);</span>
+<span class="fc" id="L130">            app.rect(xCoordinate, speed_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L131">            speed_up_button_color_change = true;</span>
+        }
+        
+        //Add the text
+<span class="fc" id="L135">        app.fill(0);</span>
+<span class="fc" id="L136">        app.textSize(12);</span>
+<span class="fc" id="L137">        String message = &quot;2x speed&quot;;</span>
+<span class="fc" id="L138">        app.text(message, xCoordinate + buttonSize + 5, speed_button_yCoordinate + buttonSize/2);</span>
+    
+        //draw the icon
+<span class="fc" id="L141">        app.fill(0);</span>
+<span class="fc" id="L142">        app.textSize(30);</span>
+<span class="fc" id="L143">        String icon = &quot;FF&quot;;</span>
+<span class="fc" id="L144">        app.text(icon, xCoordinate + 5, speed_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L145">    }</span>
+
+    public void drawPauseButton(boolean pressed_pause_button) {
+        // Draw the pause button as a square using rect()
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (pressed_pause_button == false) {</span>
+<span class="fc" id="L150">            app.fill(0,191,255);</span>
+<span class="fc" id="L151">            app.rect(xCoordinate, pause_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L152">            pause_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L154">            app.fill(0,255,0);</span>
+<span class="fc" id="L155">            app.rect(xCoordinate, pause_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L156">            pause_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L160">        app.fill(0);</span>
+<span class="fc" id="L161">        app.textSize(12);</span>
+<span class="fc" id="L162">        String message = &quot;PAUSE&quot;;</span>
+<span class="fc" id="L163">        app.text(message, xCoordinate + buttonSize + 5, pause_button_yCoordinate + buttonSize/2);</span>
+        
+        //draw the icon
+<span class="fc" id="L166">        app.fill(0);</span>
+<span class="fc" id="L167">        app.textSize(30);</span>
+<span class="fc" id="L168">        String icon = &quot;P&quot;;</span>
+<span class="fc" id="L169">        app.text(icon, xCoordinate + 5, pause_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L170">    }</span>
+
+    public void drawBuildTowerButton(boolean pressed_Build_button) {
+        // Draw the build_tower button as a square using rect()
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (pressed_Build_button == false) {</span>
+<span class="fc" id="L175">            app.fill(0,191,255);</span>
+<span class="fc" id="L176">            app.rect(xCoordinate, build_tower_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L177">            build_tower_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L179">            app.fill(0,255,0);</span>
+<span class="fc" id="L180">            app.rect(xCoordinate, build_tower_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L181">            build_tower_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L185">        app.fill(0);</span>
+<span class="fc" id="L186">        app.textSize(12);</span>
+<span class="fc" id="L187">        String message = &quot;Build&quot;;</span>
+<span class="fc" id="L188">        app.text(message, xCoordinate + buttonSize + 5, build_tower_button_yCoordinate + buttonSize/2 -6);</span>
+<span class="fc" id="L189">        String message2 = &quot;Tower&quot;;</span>
+<span class="fc" id="L190">        app.text(message2, xCoordinate + buttonSize + 5, build_tower_button_yCoordinate + buttonSize/2 + 6);</span>
+        
+        //draw the icon
+<span class="fc" id="L193">        app.fill(0);</span>
+<span class="fc" id="L194">        app.textSize(30);</span>
+<span class="fc" id="L195">        String icon = &quot;T&quot;;</span>
+<span class="fc" id="L196">        app.text(icon, xCoordinate + 5, build_tower_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L197">    }</span>
+
+    public void drawUpgradeRangeButton(boolean pressed_upgrade_range_button) {
+        // Draw the upgrade_range button as a square using rect()
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (pressed_upgrade_range_button == false) {</span>
+<span class="fc" id="L202">            app.fill(0,191,255);</span>
+<span class="fc" id="L203">            app.rect(xCoordinate, upgrade_range_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L204">            upgrade_range_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L206">            app.fill(0,255,0);</span>
+<span class="fc" id="L207">            app.rect(xCoordinate, upgrade_range_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L208">            upgrade_range_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L212">        app.fill(0);</span>
+<span class="fc" id="L213">        app.textSize(12);</span>
+<span class="fc" id="L214">        String message = &quot;Upgrade&quot;;</span>
+<span class="fc" id="L215">        app.text(message, xCoordinate + buttonSize + 5, upgrade_range_button_yCoordinate + buttonSize/2 -6);</span>
+<span class="fc" id="L216">        String message2 = &quot;Range&quot;;</span>
+<span class="fc" id="L217">        app.text(message2, xCoordinate + buttonSize + 5, upgrade_range_button_yCoordinate + buttonSize/2 + 6);</span>
+        
+        //draw the icon
+<span class="fc" id="L220">        app.fill(0);</span>
+<span class="fc" id="L221">        app.textSize(30);</span>
+<span class="fc" id="L222">        String icon = &quot;U1&quot;;</span>
+<span class="fc" id="L223">        app.text(icon, xCoordinate + 5, upgrade_range_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L224">    }</span>
+
+    public void drawUpgradeSpeedButton(boolean pressed_upgrade_speed_button) {
+        // Draw the upgrade_speed button as a square using rect()
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        if (pressed_upgrade_speed_button == false) {</span>
+<span class="fc" id="L229">            app.fill(0,191,255);</span>
+<span class="fc" id="L230">            app.rect(xCoordinate, upgrade_speed_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L231">            upgrade_speed_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L233">            app.fill(0,255,0);</span>
+<span class="fc" id="L234">            app.rect(xCoordinate, upgrade_speed_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L235">            upgrade_speed_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L239">        app.fill(0);</span>
+<span class="fc" id="L240">        app.textSize(12);</span>
+<span class="fc" id="L241">        String message = &quot;Upgrade&quot;;</span>
+<span class="fc" id="L242">        app.text(message, xCoordinate + buttonSize + 5, upgrade_speed_button_yCoordinate + buttonSize/2 - 6);</span>
+<span class="fc" id="L243">        String message2 = &quot;Speed&quot;;</span>
+<span class="fc" id="L244">        app.text(message2, xCoordinate + buttonSize + 5, upgrade_speed_button_yCoordinate + buttonSize/2 + 6);</span>
+    
+        //draw the icon
+<span class="fc" id="L247">        app.fill(0);</span>
+<span class="fc" id="L248">        app.textSize(30);</span>
+<span class="fc" id="L249">        String icon = &quot;U2&quot;;</span>
+<span class="fc" id="L250">        app.text(icon, xCoordinate + 5, upgrade_speed_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L251">    }</span>
+
+    public void drawUpgradeDamageButton(boolean pressed_upgrade_damage_button) {
+        // Draw the upgrade_damage button as a square using rect()
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        if (pressed_upgrade_damage_button == false) {</span>
+<span class="fc" id="L256">            app.fill(0,191,255);</span>
+<span class="fc" id="L257">            app.rect(xCoordinate, upgrade_damage_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L258">            upgrade_damage_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L260">            app.fill(0,255,0);</span>
+<span class="fc" id="L261">            app.rect(xCoordinate, upgrade_damage_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L262">            upgrade_damage_button_color_change = true;</span>
+        }
+        //Add the text
+<span class="fc" id="L265">        app.fill(0);</span>
+<span class="fc" id="L266">        app.textSize(12);</span>
+<span class="fc" id="L267">        String message = &quot;Upgrade&quot;;</span>
+<span class="fc" id="L268">        app.text(message, xCoordinate + buttonSize + 5, upgrade_damage_button_yCoordinate + buttonSize/2 - 6);</span>
+<span class="fc" id="L269">        String message2 = &quot;Damage&quot;;</span>
+<span class="fc" id="L270">        app.text(message2, xCoordinate + buttonSize + 5, upgrade_damage_button_yCoordinate + buttonSize/2 + 6);</span>
+        
+        //draw the icon
+<span class="fc" id="L273">        app.fill(0);</span>
+<span class="fc" id="L274">        app.textSize(30);</span>
+<span class="fc" id="L275">        String icon = &quot;U3&quot;;</span>
+<span class="fc" id="L276">        app.text(icon, xCoordinate + 5, upgrade_damage_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L277">    }</span>
+
+    public void drawManaPoolButton(boolean pressed_mana_pool_button) {
+        // Draw the mana_pool button as a square using rect()
+<span class="fc bfc" id="L281" title="All 2 branches covered.">        if (pressed_mana_pool_button == false) {</span>
+<span class="fc" id="L282">            app.fill(0,191,255);</span>
+<span class="fc" id="L283">            app.rect(xCoordinate, mana_pool_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L284">            mana_pool_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L286">            app.fill(0,255,0);</span>
+<span class="fc" id="L287">            app.rect(xCoordinate, mana_pool_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L288">            mana_pool_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L292">        app.fill(0);</span>
+<span class="fc" id="L293">        app.textSize(11);</span>
+<span class="fc" id="L294">        String message = &quot;Mana Pool&quot;;</span>
+<span class="fc" id="L295">        app.text(message, xCoordinate + buttonSize + 5, mana_pool_button_yCoordinate + buttonSize/2);</span>
+<span class="fc" id="L296">        String message2 = &quot;cost: 100&quot;;</span>
+<span class="fc" id="L297">        app.text(message2, xCoordinate + buttonSize + 5, mana_pool_button_yCoordinate + buttonSize/2 + 12);</span>
+        
+        //draw the icon
+<span class="fc" id="L300">        app.fill(0);</span>
+<span class="fc" id="L301">        app.textSize(30);</span>
+<span class="fc" id="L302">        String icon = &quot;M&quot;;</span>
+<span class="fc" id="L303">        app.text(icon, xCoordinate + 5, mana_pool_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L304">    }</span>
+
+    public void draw_freezing_button(boolean pressed_freeze_button) {
+        // Draw the freezing button as a square using rect()
+<span class="fc bfc" id="L308" title="All 2 branches covered.">        if (pressed_freeze_button == false) {</span>
+<span class="fc" id="L309">            app.fill(0,191,255);</span>
+<span class="fc" id="L310">            app.rect(xCoordinate, freezing_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L311">            freezing_button_color_change = false;</span>
+        } else {
+<span class="fc" id="L313">            app.fill(0,255,0);</span>
+<span class="fc" id="L314">            app.rect(xCoordinate, freezing_button_yCoordinate, buttonSize, buttonSize);</span>
+<span class="fc" id="L315">            freezing_button_color_change = true;</span>
+        }
+
+        //Add the text
+<span class="fc" id="L319">        app.fill(0);</span>
+<span class="fc" id="L320">        app.textSize(12);</span>
+<span class="fc" id="L321">        String message = &quot;Freezing&quot;;</span>
+<span class="fc" id="L322">        app.text(message, xCoordinate + buttonSize + 5, freezing_button_yCoordinate + buttonSize/2);</span>
+<span class="fc" id="L323">        String message2 = &quot;cost: 50&quot;;</span>
+<span class="fc" id="L324">        app.text(message2, xCoordinate + buttonSize + 5, freezing_button_yCoordinate + buttonSize/2 + 12);</span>
+        
+        //draw the icon
+<span class="fc" id="L327">        app.fill(0);</span>
+<span class="fc" id="L328">        app.textSize(30);</span>
+<span class="fc" id="L329">        String icon = &quot;C&quot;;</span>
+<span class="fc" id="L330">        app.text(icon, xCoordinate + 5, freezing_button_yCoordinate + buttonSize/2 + 10);</span>
+<span class="fc" id="L331">    }</span>
+
+    public void drawBar(boolean pressed_speed_up_button, boolean pressed_pause_button, boolean pressed_Build_button, boolean pressed_upgrade_range_button, boolean pressed_upgrade_speed_button, boolean pressed_upgrade_damage_button, boolean pressed_mana_pool_button, boolean pressed_freeze_button) {
+        // Draw the bar as a rectangle using rect()
+<span class="fc" id="L335">        drawBuildTowerButton(pressed_Build_button);</span>
+<span class="fc" id="L336">        drawSpeedButton(pressed_speed_up_button);</span>
+<span class="fc" id="L337">        drawPauseButton(pressed_pause_button);</span>
+<span class="fc" id="L338">        drawUpgradeRangeButton(pressed_upgrade_range_button);</span>
+<span class="fc" id="L339">        drawUpgradeSpeedButton(pressed_upgrade_speed_button);</span>
+<span class="fc" id="L340">        drawUpgradeDamageButton(pressed_upgrade_damage_button);</span>
+<span class="fc" id="L341">        drawManaPoolButton(pressed_mana_pool_button);</span>
+<span class="fc" id="L342">        draw_freezing_button(pressed_freeze_button);</span>
+<span class="fc" id="L343">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

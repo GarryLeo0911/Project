@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.MouseEvent;
+
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+
+import java.util.*;
+
+
+public class App extends PApplet {
+    public static final int CELLSIZE = 32;
+    public static final int SIDEBAR = 120;
+    public static final int TOPBAR = 40;
+    public static final int BOARD_WIDTH = 20;
+
+<span class="fc" id="L23">    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;</span>
+<span class="fc" id="L24">    public static int HEIGHT = BOARD_WIDTH*CELLSIZE+TOPBAR;</span>
+
+    public static final int FPS = 60;
+
+    public String configPath;
+
+<span class="fc" id="L30">    public Random random = new Random();</span>
+
+    //load the map condition
+    public ArrayList&lt;ArrayList&lt;Character&gt;&gt; processed_map_data;
+
+    //initiate the json object
+    JSONObject jsonData;
+    String layout;
+
+    //initiate the lane grid
+    PImage straight_lane;
+    PImage corner_lane;
+    PImage T_lane;
+    PImage crossing_lane;
+
+    //initiate the environment grid
+    PImage grass;
+    PImage shrub;
+
+    //initiate the Wizard's house
+    PImage house;
+
+    //initiate the monster's image
+    PImage gremlin;
+    PImage gremlin1;
+    PImage gremlin2;
+    PImage gremlin3;
+    PImage gremlin4;
+    PImage gremlin5;
+    PImage worm;
+    PImage beetle;
+	
+    //initiate the tower's image
+    PImage tower0;
+    PImage tower1;
+    PImage tower2;
+
+    //initiate the fireball's image
+    PImage fireball;
+
+    //initiate the monster's parameters
+    String type;
+    int hp;
+    float speed;
+    float armour;
+    int mana_gained_on_kill;
+
+    //initiate the monsters in wave
+    ArrayList&lt;ArrayList&lt;Monster&gt;&gt; monsters;
+    Wave wave;
+    java.util.ArrayList&lt;Integer&gt; quantity_per_wave;
+    JSONArray wave_Array;
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; monster_per_wave_per_type;
+    //initiate the wave's parameters
+    ArrayList&lt;Float&gt; duration_per_wave;
+    ArrayList&lt;Float&gt; pre_wave_pause;
+    float total_time;
+
+    //initate the bar
+    Bar bar;
+
+    //initiate the primary tower's parameters
+    ArrayList&lt;ArrayList&lt;Tower&gt;&gt; towers;
+    Multiple_tower multiple_tower;
+
+    //initiate the primary mana parameters
+    int initial_mana;
+    int mana;
+    int initial_mana_cap;
+    int mana_cap;
+    int initial_mana_gained_per_second;
+    int mana_gained_per_second;
+    int mana_pool_spell_initial_cost;
+    int mana_pool_spell_cost;
+    int mana_pool_spell_cost_increase_per_use;
+    float mana_pool_spell_cap_multiplier;
+    float mana_pool_spell_mana_gained_multiplier;
+    int mana_upgrade_times;
+
+    //initiate time
+    int time;
+    float time_in_second;
+    int related_time;
+    float related_time_in_second;
+
+    //load the map condition
+    Map map_example;
+
+    //variables represent whether the button is pressed
+    boolean pressed_speed_up_button;
+    boolean pressed_pause_button;
+    boolean pressed_Build_button;
+    boolean pressed_upgrade_range_button;
+    boolean pressed_upgrade_speed_button;
+    boolean pressed_upgrade_damage_button;
+    boolean pressed_mana_pool_button;
+    boolean pressed_freeze_button;
+    boolean mousePressed_in_map;
+    boolean keyrPressed;
+
+    //check whether the game is win or lose
+    boolean game_win;
+    boolean game_lose;
+
+
+
+<span class="fc" id="L136">    public App() {</span>
+<span class="fc" id="L137">        this.configPath = &quot;config.json&quot;;</span>
+<span class="fc" id="L138">        time = 0;</span>
+
+        //initiate the monsters in wave
+<span class="fc" id="L141">        monsters = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L142">        quantity_per_wave = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L143">        wave_Array = new JSONArray();</span>
+<span class="fc" id="L144">        duration_per_wave = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L145">        total_time = 0;</span>
+<span class="fc" id="L146">        pre_wave_pause = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L147">        time_in_second = 0;</span>
+<span class="fc" id="L148">        towers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L149">        keyrPressed = true;</span>
+        
+        
+<span class="fc" id="L152">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+	@Override
+    public void settings() {
+<span class="fc" id="L159">        size(WIDTH, HEIGHT);</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+     */
+	@Override
+    public void setup() {
+<span class="fc" id="L167">        frameRate(FPS);</span>
+<span class="fc" id="L168">        time = 0;</span>
+
+<span class="fc" id="L170">        pressed_speed_up_button = false;</span>
+<span class="fc" id="L171">        pressed_pause_button = false;</span>
+<span class="fc" id="L172">        pressed_Build_button = false;</span>
+<span class="fc" id="L173">        pressed_upgrade_range_button = false;</span>
+<span class="fc" id="L174">        pressed_upgrade_speed_button = false;</span>
+<span class="fc" id="L175">        pressed_upgrade_damage_button = false;</span>
+<span class="fc" id="L176">        pressed_mana_pool_button = false;</span>
+<span class="fc" id="L177">        pressed_freeze_button = false;</span>
+
+<span class="fc" id="L179">        mousePressed_in_map = false;</span>
+<span class="fc" id="L180">        game_win = false;</span>
+<span class="fc" id="L181">        game_lose = false;</span>
+
+        // Load images during setup
+        //Load the path grid
+<span class="fc" id="L185">        straight_lane = loadImage(&quot;src/main/resources/WizardTD/path0.png&quot;);</span>
+<span class="fc" id="L186">        corner_lane = loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;);</span>
+<span class="fc" id="L187">        T_lane = loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;);</span>
+<span class="fc" id="L188">        crossing_lane = loadImage(&quot;src/main/resources/WizardTD/path3.png&quot;);</span>
+
+        //Load the environment grid
+<span class="fc" id="L191">        grass = loadImage(&quot;src/main/resources/WizardTD/grass.png&quot;);</span>
+<span class="fc" id="L192">        shrub = loadImage(&quot;src/main/resources/WizardTD/shrub.png&quot;);</span>
+
+        //Load the wizzard house
+<span class="fc" id="L195">        house = loadImage(&quot;src/main/resources/WizardTD/wizard_house.png&quot;);</span>
+
+        //Load the monsters
+<span class="fc" id="L198">        gremlin = loadImage(&quot;src/main/resources/WizardTD/gremlin.png&quot;);</span>
+<span class="fc" id="L199">        gremlin1 = loadImage(&quot;src/main/resources/WizardTD/gremlin1.png&quot;);</span>
+<span class="fc" id="L200">        gremlin2 = loadImage(&quot;src/main/resources/WizardTD/gremlin2.png&quot;);</span>
+<span class="fc" id="L201">        gremlin3 = loadImage(&quot;src/main/resources/WizardTD/gremlin3.png&quot;);</span>
+<span class="fc" id="L202">        gremlin4 = loadImage(&quot;src/main/resources/WizardTD/gremlin4.png&quot;);</span>
+<span class="fc" id="L203">        gremlin5 = loadImage(&quot;src/main/resources/WizardTD/gremlin5.png&quot;);</span>
+<span class="fc" id="L204">        worm = loadImage(&quot;src/main/resources/WizardTD/worm.png&quot;);</span>
+<span class="fc" id="L205">        beetle = loadImage(&quot;src/main/resources/WizardTD/beetle.png&quot;);</span>
+
+        //Load the towers' image
+<span class="fc" id="L208">        tower0 = loadImage(&quot;src/main/resources/WizardTD/tower0.png&quot;);</span>
+<span class="fc" id="L209">        tower1 = loadImage(&quot;src/main/resources/WizardTD/tower1.png&quot;);</span>
+<span class="fc" id="L210">        tower2 = loadImage(&quot;src/main/resources/WizardTD/tower2.png&quot;);</span>
+
+        //Load the fireball's image
+<span class="fc" id="L213">        fireball = loadImage(&quot;src/main/resources/WizardTD/fireball.png&quot;);</span>
+
+        //load the json file
+<span class="fc" id="L216">        jsonData = loadJSONObject(configPath);</span>
+<span class="fc" id="L217">        layout = jsonData.getString(&quot;layout&quot;);</span>
+
+        //load the map condition
+<span class="fc" id="L220">        map_example = new Map(layout, this);</span>
+<span class="fc" id="L221">        processed_map_data = map_example.processed_map_data;</span>
+
+        //initiate the wave parameters
+<span class="fc" id="L224">        wave = new Wave(jsonData, this, this);</span>
+<span class="fc" id="L225">        monsters = wave.getMonsters();</span>
+<span class="fc" id="L226">        wave_Array = jsonData.getJSONArray(&quot;waves&quot;);</span>
+<span class="fc" id="L227">        quantity_per_wave = wave.get_total_quantity_ArrayList();</span>
+<span class="fc" id="L228">        duration_per_wave = wave.get_time_per_wave();</span>
+<span class="fc" id="L229">        total_time = wave.get_total_time();</span>
+<span class="fc" id="L230">        pre_wave_pause = wave.get_pre_wave_pause();</span>
+
+        //initiate the bar
+<span class="fc" id="L233">        bar = new Bar(this, mouseX, mouseY, mousePressed, pressed_speed_up_button, pressed_pause_button, pressed_Build_button, pressed_upgrade_range_button, pressed_upgrade_speed_button, pressed_upgrade_damage_button, pressed_mana_pool_button);</span>
+
+        //initiate the initial multiple tower
+<span class="fc" id="L236">        multiple_tower = new Multiple_tower(this, this);</span>
+<span class="fc" id="L237">        towers = multiple_tower.get_towers();</span>
+
+        //initiate the primary mana parameters
+<span class="fc" id="L240">        initial_mana = jsonData.getInt(&quot;initial_mana&quot;);</span>
+<span class="fc" id="L241">        mana = initial_mana;</span>
+<span class="fc" id="L242">        initial_mana_cap = jsonData.getInt(&quot;initial_mana_cap&quot;);</span>
+<span class="fc" id="L243">        mana_cap = initial_mana_cap;</span>
+<span class="fc" id="L244">        initial_mana_gained_per_second = jsonData.getInt(&quot;initial_mana_gained_per_second&quot;);</span>
+<span class="fc" id="L245">        mana_gained_per_second = initial_mana_gained_per_second;</span>
+<span class="fc" id="L246">        mana_pool_spell_initial_cost = jsonData.getInt(&quot;mana_pool_spell_initial_cost&quot;);</span>
+<span class="fc" id="L247">        mana_pool_spell_cost = mana_pool_spell_initial_cost;</span>
+<span class="fc" id="L248">        mana_pool_spell_cost_increase_per_use = jsonData.getInt(&quot;mana_pool_spell_cost_increase_per_use&quot;);</span>
+<span class="fc" id="L249">        mana_pool_spell_cap_multiplier = jsonData.getFloat(&quot;mana_pool_spell_cap_multiplier&quot;);</span>
+<span class="fc" id="L250">        mana_pool_spell_mana_gained_multiplier = jsonData.getFloat(&quot;mana_pool_spell_mana_gained_multiplier&quot;)-1;</span>
+<span class="fc" id="L251">        mana_upgrade_times = 0;</span>
+<span class="fc" id="L252">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+	@Override
+    public void keyPressed(){
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        if (key == 102) {</span>
+<span class="fc" id="L260">            pressed_speed_up_button = true;</span>
+        }
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if (key == 112) {</span>
+<span class="fc" id="L263">            pressed_pause_button = true;</span>
+        }
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if (key == 116) {</span>
+<span class="fc" id="L266">            pressed_Build_button = true;</span>
+        }
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        if (key == 49) {</span>
+<span class="fc" id="L269">            pressed_upgrade_range_button = true;</span>
+        }
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        if (key == 50) {</span>
+<span class="fc" id="L272">            pressed_upgrade_speed_button = true;</span>
+        }
+<span class="fc bfc" id="L274" title="All 2 branches covered.">        if (key == 51) {</span>
+<span class="fc" id="L275">            pressed_upgrade_damage_button = true;</span>
+        }
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        if (key == 109) {</span>
+<span class="fc" id="L278">            pressed_mana_pool_button = true;</span>
+        }
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        if (key == 99) {</span>
+<span class="fc" id="L281">            pressed_freeze_button = true;</span>
+        }
+<span class="pc bpc" id="L283" title="1 of 6 branches missed.">        if (key == 114 &amp;&amp; game_lose &amp;&amp; !keyrPressed) {</span>
+<span class="fc" id="L284">            game_lose = false;</span>
+<span class="fc" id="L285">            setup();</span>
+<span class="fc" id="L286">            keyrPressed = true;</span>
+        }
+<span class="fc" id="L288">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+	@Override
+    public void keyReleased(){
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        if (key == 102) {</span>
+<span class="fc" id="L296">            pressed_speed_up_button = false;</span>
+        }
+<span class="fc bfc" id="L298" title="All 2 branches covered.">        if (key == 112) {</span>
+<span class="fc" id="L299">            pressed_pause_button = false;</span>
+        }
+<span class="fc bfc" id="L301" title="All 2 branches covered.">        if (key == 116) {</span>
+<span class="fc" id="L302">            pressed_Build_button = false;</span>
+        }
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        if (key == 49) {</span>
+<span class="fc" id="L305">            pressed_upgrade_range_button = false;</span>
+        }
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        if (key == 50) {</span>
+<span class="fc" id="L308">            pressed_upgrade_speed_button = false;</span>
+        }
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if (key == 51) {</span>
+<span class="fc" id="L311">            pressed_upgrade_damage_button = false;</span>
+        }
+<span class="fc bfc" id="L313" title="All 2 branches covered.">        if (key == 109) {</span>
+<span class="fc" id="L314">            pressed_mana_pool_button = false;</span>
+        }
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        if (key == 99) {</span>
+<span class="fc" id="L317">            pressed_freeze_button = false;</span>
+        }
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        if (key == 114) {</span>
+<span class="fc" id="L320">            keyrPressed = false;</span>
+        }
+<span class="fc" id="L322">    }</span>
+
+
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+<span class="pc bpc" id="L328" title="1 of 8 branches missed.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 47 &amp;&amp; mouseY &lt; 97) {</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">            pressed_speed_up_button = !pressed_speed_up_button;</span>
+        }
+<span class="fc bfc" id="L331" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 111 &amp;&amp; mouseY &lt; 161) {</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            pressed_pause_button = !pressed_pause_button;</span>
+        }
+<span class="fc bfc" id="L334" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 175 &amp;&amp; mouseY &lt; 225) {</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">            pressed_Build_button = !pressed_Build_button;</span>
+        }
+<span class="fc bfc" id="L337" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 239 &amp;&amp; mouseY &lt; 289) {</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">            pressed_upgrade_range_button = !pressed_upgrade_range_button;</span>
+        }
+<span class="fc bfc" id="L340" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 303 &amp;&amp; mouseY &lt; 353) {</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">            pressed_upgrade_speed_button = !pressed_upgrade_speed_button;</span>
+        }
+<span class="fc bfc" id="L343" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 367 &amp;&amp; mouseY &lt; 417) {</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">            pressed_upgrade_damage_button = !pressed_upgrade_damage_button;</span>
+        }
+<span class="fc bfc" id="L346" title="All 8 branches covered.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 431 &amp;&amp; mouseY &lt; 481) {</span>
+<span class="fc bfc" id="L347" title="All 2 branches covered.">            pressed_mana_pool_button = !pressed_mana_pool_button;</span>
+        }
+<span class="pc bpc" id="L349" title="1 of 8 branches missed.">        if (mouseX &gt; 650 &amp;&amp; mouseX &lt; 700 &amp;&amp; mouseY &gt; 495 &amp;&amp; mouseY &lt; 545) {</span>
+<span class="fc bfc" id="L350" title="All 2 branches covered.">            pressed_freeze_button = !pressed_freeze_button;</span>
+        }
+<span class="fc" id="L352">    }</span>
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+<span class="pc bpc" id="L356" title="2 of 8 branches missed.">        if (mouseX &gt; 0 &amp;&amp; mouseX &lt; 640 &amp;&amp; mouseY &gt; 40 &amp;&amp; mouseY &lt; 680) {</span>
+<span class="fc" id="L357">            mousePressed_in_map = true;</span>
+        }
+<span class="fc" id="L359">    }   </span>
+
+    /*@Override
+    public void mouseDragged(MouseEvent e) {
+
+    }*/
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+	@Override
+    public void draw() {
+<span class="fc" id="L371">        background(210,180,140);</span>
+<span class="fc" id="L372">        mouseClicked();</span>
+<span class="fc" id="L373">        mouseReleased();</span>
+<span class="fc" id="L374">        keyPressed();</span>
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        if (!keyPressed){</span>
+<span class="fc" id="L376">            keyReleased();</span>
+        }
+        
+<span class="fc bfc" id="L379" title="All 4 branches covered.">        if (!game_lose &amp;&amp; !game_win) {</span>
+
+<span class="fc bfc" id="L381" title="All 4 branches covered.">            if (!pressed_pause_button &amp;&amp; !pressed_speed_up_button) {</span>
+<span class="fc" id="L382">                time++;</span>
+<span class="pc bpc" id="L383" title="1 of 4 branches missed.">            } else if (pressed_speed_up_button &amp;&amp; !pressed_pause_button) {</span>
+<span class="fc" id="L384">                time += 2;</span>
+            } else {
+<span class="fc" id="L386">                time = time;</span>
+            }
+<span class="fc" id="L388">            time_in_second = time/60;</span>
+
+            //initiate the map
+<span class="fc bfc" id="L391" title="All 2 branches covered.">            for (int y=0; y&lt;processed_map_data.size(); y++){</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">                for (int x=0; x&lt;processed_map_data.get(y).size(); x++){</span>
+<span class="fc" id="L393">                    float xPos = x * CELLSIZE;</span>
+<span class="fc" id="L394">                    float yPos = 40 + y * CELLSIZE;</span>
+<span class="fc" id="L395">                    char symbol = processed_map_data.get(y).get(x);</span>
+<span class="fc" id="L396">                    PImage imageToDraw = null;</span>
+<span class="pc bpc" id="L397" title="1 of 5 branches missed.">                    switch (symbol){</span>
+                        case 'S':
+<span class="fc" id="L399">                            imageToDraw = shrub;</span>
+<span class="fc" id="L400">                            image(imageToDraw, xPos, yPos, 32, 32);</span>
+<span class="fc" id="L401">                            break;</span>
+                        case 'X':
+<span class="fc" id="L403">                            PImage original_imageToDraw = map_example.choose_path_type(y, x);</span>
+<span class="fc" id="L404">                            double rotate_angle = map_example.rotate_angle(y, x);</span>
+<span class="fc" id="L405">                            imageToDraw = rotateImageByDegrees(original_imageToDraw, rotate_angle);</span>
+<span class="fc" id="L406">                            image(imageToDraw, xPos, yPos, 32, 32);</span>
+<span class="fc" id="L407">                            break;</span>
+                        case 'W':
+<span class="fc" id="L409">                            imageToDraw = grass;</span>
+<span class="fc" id="L410">                            image(imageToDraw, xPos, yPos, 32, 32);</span>
+<span class="fc" id="L411">                            break;</span>
+                        case ' ':
+<span class="fc" id="L413">                            imageToDraw = grass;</span>
+<span class="fc" id="L414">                            image(imageToDraw, xPos, yPos, 32, 32);</span>
+                            break;
+
+                    }
+                }
+            }
+<span class="fc bfc" id="L420" title="All 2 branches covered.">            for (int y=0; y&lt;processed_map_data.size(); y++){</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">                for (int x=0; x&lt;processed_map_data.get(y).size(); x++){</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">                    if (processed_map_data.get(y).get(x) == 'W'){</span>
+<span class="fc" id="L423">                        float xPos = x * CELLSIZE;</span>
+<span class="fc" id="L424">                        float yPos = 40 + y * CELLSIZE;</span>
+<span class="fc" id="L425">                        image(house, xPos, yPos, 48, 48);</span>
+                    }
+                }
+            }
+
+            
+            //about the mana
+<span class="fc" id="L432">            draw_mana_bar(mana, mana_cap);</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">            if (!pressed_pause_button) {</span>
+<span class="fc" id="L434">                mana += mana_increase_by_time(time);</span>
+            }
+<span class="fc bfc" id="L436" title="All 2 branches covered.">            if (pressed_mana_pool_button) {</span>
+<span class="fc" id="L437">                upgrade_mana_pool();</span>
+            }
+
+            //draw the bar
+<span class="fc" id="L441">            bar.drawBar(pressed_speed_up_button, pressed_pause_button, pressed_Build_button, pressed_upgrade_range_button, pressed_upgrade_speed_button, pressed_upgrade_damage_button, pressed_mana_pool_button, pressed_freeze_button);</span>
+
+            //draw the monsters in wave
+<span class="fc bfc" id="L444" title="All 2 branches covered.">            if (!pressed_pause_button) {</span>
+<span class="fc" id="L445">                wave.display_monster_in_wave(monsters, time_in_second, pressed_speed_up_button);</span>
+            }
+
+            //build the tower and upgrade the tower
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">            if (mousePressed_in_map) {</span>
+<span class="nc" id="L450">                mana = multiple_tower.build_tower(towers, mana, mouseX, mouseY, mousePressed_in_map, pressed_Build_button, pressed_upgrade_range_button, pressed_upgrade_speed_button, pressed_upgrade_damage_button, pressed_freeze_button);</span>
+<span class="nc" id="L451">                mousePressed_in_map = false;</span>
+            }
+
+            //display the tower's range
+<span class="fc" id="L455">            multiple_tower.display_tower_range(towers, mouseX, mouseY);</span>
+
+            //display the tower
+<span class="fc bfc" id="L458" title="All 2 branches covered.">            for (int i=0; i &lt; towers.size(); i++){</span>
+<span class="fc bfc" id="L459" title="All 2 branches covered.">                for (int j=0; j &lt; towers.get(i).size(); j++){</span>
+<span class="fc" id="L460">                    towers.get(i).get(j).display_tower(pressed_pause_button, pressed_speed_up_button);</span>
+                }
+            }
+
+            //display the monsters
+<span class="fc bfc" id="L465" title="All 2 branches covered.">            for (int i=0; i&lt;monsters.size(); i++){</span>
+<span class="fc bfc" id="L466" title="All 2 branches covered.">                for (int j=0; j&lt;monsters.get(i).size(); j++){</span>
+<span class="fc" id="L467">                    monsters.get(i).get(j).display(pressed_pause_button, pressed_speed_up_button);</span>
+<span class="fc bfc" id="L468" title="All 4 branches covered.">                    if (monsters.get(i).get(j).hp &lt;= 0 &amp;&amp; !monsters.get(i).get(j).whether_give_mana){</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">                        if (mana &lt; mana_cap) {</span>
+<span class="fc" id="L470">                            mana += monsters.get(i).get(j).mana_gained_on_kill * (1 + mana_upgrade_times*mana_pool_spell_mana_gained_multiplier);</span>
+                        } else {
+<span class="fc" id="L472">                            mana = mana_cap;</span>
+                        }
+<span class="fc" id="L474">                        monsters.get(i).get(j).setWhether_give_mana();</span>
+<span class="fc" id="L475">                        monsters.get(i).get(j).monster_is_dead = true;</span>
+                    }
+<span class="fc bfc" id="L477" title="All 6 branches covered.">                    if (monsters.get(i).get(j).reach_the_house &amp;&amp; !monsters.get(i).get(j).subtract_mana == false) {</span>
+<span class="fc" id="L478">                        mana -= monsters.get(i).get(j).hp;</span>
+<span class="fc" id="L479">                        monsters.get(i).get(j).setSubtract_mana();</span>
+                    }
+                }
+            }
+<span class="fc" id="L483">            noStroke();    </span>
+        }
+<span class="fc bfc" id="L485" title="All 2 branches covered.">        if (mana &lt; 0) {</span>
+<span class="fc" id="L486">            game_lose = true;</span>
+        }
+<span class="fc bfc" id="L488" title="All 2 branches covered.">        if (game_lose) {</span>
+<span class="fc" id="L489">            fill(0);</span>
+<span class="fc" id="L490">            textSize(50);</span>
+<span class="fc" id="L491">            String lose = &quot;You Lost!&quot;;</span>
+<span class="fc" id="L492">            text(lose, 100, 300);</span>
+<span class="fc" id="L493">            fill(0);</span>
+<span class="fc" id="L494">            textSize(30);</span>
+<span class="fc" id="L495">            String restart = &quot;Press 'r' to restart&quot;;</span>
+<span class="fc" id="L496">            text(restart, 100, 400);</span>
+        }
+
+<span class="fc" id="L499">        int totalMonsters = 0;</span>
+<span class="fc" id="L500">        int defeatedMonsters = 0;</span>
+
+<span class="fc bfc" id="L502" title="All 2 branches covered.">        for (int y = 0; y &lt; monsters.size(); y++) {</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">            for (int x = 0; x &lt; monsters.get(y).size(); x++) {</span>
+<span class="fc" id="L504">                totalMonsters++;</span>
+<span class="fc bfc" id="L505" title="All 2 branches covered.">                if (monsters.get(y).get(x).hp&lt;=0) {</span>
+<span class="fc" id="L506">                    defeatedMonsters++;</span>
+                }
+            }
+        }
+
+<span class="fc bfc" id="L511" title="All 2 branches covered.">        if (defeatedMonsters == totalMonsters) {</span>
+<span class="fc" id="L512">            game_win = true;</span>
+<span class="fc" id="L513">            fill(0);</span>
+<span class="fc" id="L514">            textSize(50);</span>
+<span class="fc" id="L515">            String win = &quot;You Win!&quot;;</span>
+<span class="fc" id="L516">            text(win, 100, 300);</span>
+        }
+<span class="fc" id="L518">    }</span>
+
+
+    public static void main(String[] args) {
+<span class="nc" id="L522">        PApplet.main(&quot;WizardTD.App&quot;);</span>
+<span class="nc" id="L523">    }</span>
+
+    /**
+     * Source: https://stackoverflow.com/questions/37758061/rotate-a-buffered-image-in-java
+     * @param pimg The image to be rotated
+     * @param angle between 0 and 360 degrees
+     * @return the new rotated image
+     */
+    public PImage rotateImageByDegrees(PImage pimg, double angle) {
+<span class="fc" id="L532">        BufferedImage img = (BufferedImage) pimg.getNative();</span>
+<span class="fc" id="L533">        double rads = Math.toRadians(angle);</span>
+<span class="fc" id="L534">        double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));</span>
+<span class="fc" id="L535">        int w = img.getWidth();</span>
+<span class="fc" id="L536">        int h = img.getHeight();</span>
+<span class="fc" id="L537">        int newWidth = (int) Math.floor(w * cos + h * sin);</span>
+<span class="fc" id="L538">        int newHeight = (int) Math.floor(h * cos + w * sin);</span>
+
+<span class="fc" id="L540">        PImage result = this.createImage(newWidth, newHeight, ARGB);</span>
+        //BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+<span class="fc" id="L542">        BufferedImage rotated = (BufferedImage) result.getNative();</span>
+<span class="fc" id="L543">        Graphics2D g2d = rotated.createGraphics();</span>
+<span class="fc" id="L544">        AffineTransform at = new AffineTransform();</span>
+<span class="fc" id="L545">        at.translate((newWidth - w) / 2, (newHeight - h) / 2);</span>
+
+<span class="fc" id="L547">        int x = w / 2;</span>
+<span class="fc" id="L548">        int y = h / 2;</span>
+
+<span class="fc" id="L550">        at.rotate(rads, x, y);</span>
+<span class="fc" id="L551">        g2d.setTransform(at);</span>
+<span class="fc" id="L552">        g2d.drawImage(img, 0, 0, null);</span>
+<span class="fc" id="L553">        g2d.dispose();</span>
+<span class="fc bfc" id="L554" title="All 2 branches covered.">        for (int i = 0; i &lt; newWidth; i++) {</span>
+<span class="fc bfc" id="L555" title="All 2 branches covered.">            for (int j = 0; j &lt; newHeight; j++) {</span>
+<span class="fc" id="L556">                result.set(i, j, rotated.getRGB(i, j));</span>
+            }
+        }
+
+<span class="fc" id="L560">        return result;</span>
+    }
+
+
+    //make a function to let the mana increase by time
+    public int mana_increase_by_time(int time){
+<span class="fc bfc" id="L566" title="All 2 branches covered.">        if (time % 60 == 0){</span>
+<span class="pc bpc" id="L567" title="1 of 2 branches missed.">            if (mana &lt; mana_cap) {</span>
+<span class="fc" id="L568">                return mana_gained_per_second;</span>
+            } else {
+<span class="nc" id="L570">                return 0;</span>
+            }
+        } else {
+<span class="fc" id="L573">            return 0;</span>
+        }
+    }
+
+
+    //make a method to upgrade the mana pool
+    public void upgrade_mana_pool(){
+<span class="fc bfc" id="L580" title="All 2 branches covered.">        if (mana &gt;= mana_pool_spell_cost){</span>
+<span class="fc" id="L581">            mana_upgrade_times += 1;</span>
+<span class="fc" id="L582">            mana -= mana_pool_spell_cost;</span>
+<span class="fc" id="L583">            mana_pool_spell_cost += mana_pool_spell_cost_increase_per_use;</span>
+<span class="fc" id="L584">            mana_cap = (int) (mana_cap * mana_pool_spell_cap_multiplier);</span>
+<span class="fc" id="L585">            mana_gained_per_second = (int) (mana_gained_per_second * (1 + mana_upgrade_times*mana_pool_spell_mana_gained_multiplier));</span>
+        }
+<span class="fc" id="L587">    }</span>
+
+
+    //draw the bar for mana
+    public void draw_mana_bar(int mana, int mana_cap){
+<span class="fc" id="L592">        fill(0);</span>
+<span class="fc" id="L593">        textSize(30);</span>
+<span class="fc" id="L594">        String title = &quot;Mana:&quot;;</span>
+<span class="fc" id="L595">        text(title, 300, 30);</span>
+
+<span class="fc" id="L597">        fill(255);</span>
+<span class="fc" id="L598">        rect(400, 10, 300, 20);</span>
+
+<span class="fc" id="L600">        fill(135,206,250);</span>
+<span class="fc" id="L601">        rect(400, 10, 300 * mana / mana_cap, 20);</span>
+
+<span class="fc" id="L603">        fill(0);</span>
+<span class="fc" id="L604">        textSize(20);</span>
+<span class="fc" id="L605">        String mana_string = Integer.toString(mana) + &quot;/&quot; + Integer.toString(mana_cap);</span>
+<span class="fc" id="L606">        text(mana_string, 500, 27);</span>
+<span class="fc" id="L607">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

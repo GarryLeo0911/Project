@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tower.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Tower.java</span></div><h1>Tower.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import java.util.ArrayList;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+
+public class Tower {
+    private JSONObject jsonData;
+    private App app;
+    public PApplet pApplet;
+    private int initial_tower_range;
+    private int tower_range;
+    private float initial_tower_firing_speed;
+    private float tower_firing_speed;
+    private int initial_tower_damage;
+    private int tower_damage;
+    private int tower_cost;
+
+    public int tower_range_grade;
+    public int tower_firing_speed_grade;
+    public int tower_damage_grade;
+    public boolean initial_freezing;
+    private boolean freezing;
+
+    //get the tower location
+    private int towerX;
+    private int towerY;
+
+    //load the tower image
+    PImage tower0;
+    PImage tower1;
+    PImage tower2;
+
+    //decide whether the tower can be built
+    boolean canBuild;
+
+    //decide whether show the range
+    boolean display_range;
+
+    //get all the monsters in the game
+    ArrayList&lt;ArrayList&lt;Monster&gt;&gt; monsters;
+
+    //calculate the distance between the tower and the monsters
+    ArrayList&lt;ArrayList&lt;Float&gt;&gt; monsters_distance;
+
+    //get the nearest monster
+    Monster nearestMonster;
+
+    //begin to set an ArrayList to store the fireballs
+    ArrayList&lt;Fireball&gt; fireballs;
+
+    //set the related time
+    float related_time;
+
+    //Eazy for testing
+    public int tower_range_test;
+    public int tower_firing_speed_test;
+    public int tower_damage_test;
+    public boolean tower_display_range_test;
+
+<span class="fc" id="L63">    public Tower (JSONObject jsonObject, App app, PApplet pApplet, int towerX, int towerY){</span>
+<span class="fc" id="L64">        this.jsonData = jsonObject;</span>
+<span class="fc" id="L65">        this.app = app;</span>
+<span class="fc" id="L66">        this.pApplet = pApplet;</span>
+
+<span class="fc" id="L68">        tower_range_test = 0;</span>
+<span class="fc" id="L69">        tower_firing_speed_test = 0;</span>
+<span class="fc" id="L70">        tower_damage_test = 0;</span>
+        
+<span class="fc" id="L72">        initial_tower_range = jsonData.getInt(&quot;initial_tower_range&quot;);</span>
+<span class="fc" id="L73">        initial_tower_firing_speed = jsonData.getFloat(&quot;initial_tower_firing_speed&quot;);</span>
+<span class="fc" id="L74">        initial_tower_damage = jsonData.getInt(&quot;initial_tower_damage&quot;);</span>
+<span class="fc" id="L75">        initial_freezing = false;</span>
+<span class="fc" id="L76">        tower_range = initial_tower_range;</span>
+<span class="fc" id="L77">        tower_firing_speed = initial_tower_firing_speed;</span>
+<span class="fc" id="L78">        tower_damage = initial_tower_damage;</span>
+<span class="fc" id="L79">        tower_cost = jsonData.getInt(&quot;tower_cost&quot;);</span>
+<span class="fc" id="L80">        tower_range_grade = 0;</span>
+<span class="fc" id="L81">        tower_firing_speed_grade = 0;</span>
+<span class="fc" id="L82">        tower_damage_grade = 0;</span>
+<span class="fc" id="L83">        freezing = initial_freezing;</span>
+
+<span class="fc" id="L85">        tower0 = app.tower0;</span>
+<span class="fc" id="L86">        tower1 = app.tower1;</span>
+<span class="fc" id="L87">        tower2 = app.tower2;</span>
+
+<span class="fc" id="L89">        canBuild = false;</span>
+<span class="fc" id="L90">        this.towerX = towerX;</span>
+<span class="fc" id="L91">        this.towerY = towerY;</span>
+
+        //initiate the monsters
+<span class="fc" id="L94">        monsters = app.monsters;</span>
+
+        //calculate the distance between the tower and the monsters
+<span class="fc" id="L97">        monsters_distance = calculate_distance();</span>
+
+        //initiate teh related time
+<span class="fc" id="L100">        related_time = 0;</span>
+
+        //initiate the fireballs
+<span class="fc" id="L103">        fireballs = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L105">        display_range = false;</span>
+<span class="fc" id="L106">        tower_display_range_test = false;</span>
+<span class="fc" id="L107">    }</span>
+
+    public int getTower_range() {
+<span class="fc" id="L110">        return tower_range;</span>
+    }
+
+    public float getTower_firing_speed() {
+<span class="fc" id="L114">        return tower_firing_speed;</span>
+    }
+
+    public int getTower_damage() {
+<span class="fc" id="L118">        return tower_damage;</span>
+    }
+
+    public int getTower_cost() {
+<span class="fc" id="L122">        return tower_cost;</span>
+    }
+
+    public void setWhether_can_build_tower() {
+<span class="fc" id="L126">        canBuild = true;</span>
+<span class="fc" id="L127">    }</span>
+
+    public void setWhether_display_range() {
+<span class="nc" id="L130">        display_range = true;</span>
+<span class="nc" id="L131">    }</span>
+
+    //let the tower to be upgraded
+    public void setTower_range_grade() {
+<span class="fc" id="L135">        tower_range_grade += 1;</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (tower_range_grade == 1) {</span>
+<span class="fc" id="L137">            tower_range = initial_tower_range +32;</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        } else if (tower_range_grade == 2) {</span>
+<span class="fc" id="L139">            tower_range = initial_tower_range + 64;</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        } else if (tower_range_grade == 3) {</span>
+<span class="fc" id="L141">            tower_range = initial_tower_range + 96;</span>
+        }
+<span class="fc" id="L143">    }</span>
+
+    public void setTower_firing_speed_grade() {
+<span class="fc" id="L146">        tower_firing_speed_grade += 1;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if (tower_firing_speed_grade == 1) {</span>
+<span class="fc" id="L148">            tower_firing_speed = initial_tower_firing_speed + 0.5f;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        } else if (tower_firing_speed_grade == 2) {</span>
+<span class="fc" id="L150">            tower_firing_speed = initial_tower_firing_speed + 1.0f;</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        } else if (tower_firing_speed_grade == 3) {</span>
+<span class="fc" id="L152">            tower_firing_speed = initial_tower_firing_speed + 1.5f;</span>
+        }
+<span class="fc" id="L154">    }</span>
+
+    public void setTower_damage_grade() {
+<span class="fc" id="L157">        tower_damage_grade += 1;</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (tower_damage_grade == 1) {</span>
+<span class="fc" id="L159">            tower_damage = initial_tower_damage + (initial_tower_damage)/2;</span>
+        }
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        else if (tower_damage_grade == 2) {</span>
+<span class="fc" id="L162">            tower_damage = initial_tower_damage + (initial_tower_damage*2)/2;</span>
+        }
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        else if (tower_damage_grade == 3) {</span>
+<span class="fc" id="L165">            tower_damage = initial_tower_damage + (initial_tower_damage*3)/2;</span>
+        }
+<span class="fc" id="L167">    }</span>
+
+    public void setFreezing() {
+<span class="fc" id="L170">        freezing = true;</span>
+<span class="fc" id="L171">    }</span>
+
+    public boolean getFreezing() {
+<span class="fc" id="L174">        return freezing;</span>
+    }
+
+
+    //calculate the distance between the tower and the monsters
+    public ArrayList&lt;ArrayList&lt;Float&gt;&gt; calculate_distance() {
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (monsters.size()&gt;0) {</span>
+<span class="fc" id="L181">            ArrayList&lt;ArrayList&lt;Float&gt;&gt; monsters_distance1 = new ArrayList&lt;ArrayList&lt;Float&gt;&gt;();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            for (int i=0; i&lt;monsters.size(); i++) {</span>
+<span class="fc" id="L183">                ArrayList&lt;Float&gt; distance = new ArrayList&lt;Float&gt;();</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">                for (int j=0; j&lt;monsters.get(i).size(); j++) {</span>
+<span class="fc" id="L185">                    float dx = (monsters.get(i).get(j).getMonsterX() - towerX)*32;</span>
+<span class="fc" id="L186">                    float dy = (monsters.get(i).get(j).getMonsterY() - towerY)*32;</span>
+<span class="fc" id="L187">                    float distance1 = (float) Math.sqrt(dx * dx + dy * dy);</span>
+<span class="fc" id="L188">                    distance.add(distance1);</span>
+                }
+<span class="fc" id="L190">                monsters_distance1.add(distance);</span>
+            }
+<span class="fc" id="L192">            return monsters_distance1;</span>
+        }
+<span class="nc" id="L194">        return null;</span>
+    }
+
+    //target at the nearest monster
+    public Monster target_nearest_monster() {
+<span class="fc" id="L199">        Monster nearestMonster1 = null;</span>
+<span class="fc" id="L200">        float min_distance = 1000000;</span>
+<span class="fc" id="L201">        monsters_distance = calculate_distance();</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (monsters_distance!=null) {</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            for (int x=0; x&lt;monsters_distance.size(); x++) {</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">                for (int y=0; y&lt;monsters_distance.get(x).size(); y++) {</span>
+<span class="fc bfc" id="L205" title="All 6 branches covered.">                    if (monsters_distance.get(x).get(y) &lt; min_distance &amp;&amp; monsters_distance.get(x).get(y) &lt; tower_range &amp;&amp; monsters.get(x).get(y).hp &gt; 0) {</span>
+<span class="fc" id="L206">                        min_distance = monsters_distance.get(x).get(y);</span>
+<span class="fc" id="L207">                        nearestMonster1 = monsters.get(x).get(y);</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L212">        return nearestMonster1;</span>
+    }
+
+    //begin to fire
+    public void fire(boolean pressed_speed_up_button) {
+<span class="fc" id="L217">        nearestMonster = target_nearest_monster();</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">        if (nearestMonster != null) {</span>
+            float time_to_shoot_fireball;
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">            if (pressed_speed_up_button == false){</span>
+<span class="fc" id="L221">                time_to_shoot_fireball = 1.0f/tower_firing_speed;</span>
+            } else {
+<span class="nc" id="L223">                time_to_shoot_fireball = 1.0f/(tower_firing_speed*2);</span>
+            }
+<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (related_time % time_to_shoot_fireball &lt; (1.0f/60)) {</span>
+<span class="fc" id="L226">                Fireball fireball = new Fireball(jsonData, app, pApplet, towerX, towerY, nearestMonster);</span>
+<span class="fc" id="L227">                fireballs.add(fireball);</span>
+<span class="fc" id="L228">                nearestMonster.addFireball(fireball);</span>
+            }
+        }
+<span class="fc" id="L231">        related_time += 1.0f / 60;</span>
+<span class="fc" id="L232">    }</span>
+
+    public void display_tower(boolean pressed_pause_button, boolean pressed_speed_up_button) {
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if (canBuild) {</span>
+            //begin to draw the tower by their grades
+<span class="pc bpc" id="L237" title="1 of 6 branches missed.">            if (tower_damage_grade==0 || tower_range_grade==0 || tower_firing_speed_grade==0){</span>
+<span class="fc" id="L238">                pApplet.image(tower0, towerX*32, 40+towerY*32, 32, 32);</span>
+
+<span class="fc bfc" id="L240" title="All 2 branches covered.">                if (tower_range_grade &gt;= 1) {</span>
+<span class="fc" id="L241">                    pApplet.noFill();</span>
+<span class="fc" id="L242">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L243">                    pApplet.ellipse((towerX*32)+16-12, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L244">                    pApplet.noStroke();</span>
+<span class="fc" id="L245">                    tower_range_test = 1;</span>
+                }
+<span class="fc bfc" id="L247" title="All 2 branches covered.">                if (tower_range_grade &gt;= 2) {</span>
+<span class="fc" id="L248">                    pApplet.noFill();</span>
+<span class="fc" id="L249">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L250">                    pApplet.ellipse((towerX*32)+16, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L251">                    pApplet.noStroke();</span>
+<span class="fc" id="L252">                    tower_range_test = 2;</span>
+                }
+<span class="fc bfc" id="L254" title="All 2 branches covered.">                if (tower_range_grade &gt;= 3) {</span>
+<span class="fc" id="L255">                    pApplet.noFill();</span>
+<span class="fc" id="L256">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L257">                    pApplet.ellipse((towerX*32)+16+12, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L258">                    pApplet.noStroke();</span>
+<span class="fc" id="L259">                    tower_range_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L262" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 1) {</span>
+<span class="fc" id="L263">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L264">                    pApplet.line((towerX*32)+16-12-3, (40+towerY*32)+16+12-4, (towerX*32)+16-12+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L265">                    pApplet.line((towerX*32)+16-12+3, (40+towerY*32)+16+12+4, (towerX*32)+16-12-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L266">                    tower_damage_test = 1;</span>
+                }
+<span class="fc bfc" id="L268" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 2) {</span>
+<span class="fc" id="L269">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L270">                    pApplet.line((towerX*32)+16-3, (40+towerY*32)+16+12-4, (towerX*32)+16+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L271">                    pApplet.line((towerX*32)+16+3, (40+towerY*32)+16+12+4, (towerX*32)+16+-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L272">                    tower_damage_test = 2;</span>
+                }
+<span class="fc bfc" id="L274" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 3) {</span>
+<span class="fc" id="L275">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L276">                    pApplet.line((towerX*32)+16+12-3, (40+towerY*32)+16+12-4,(towerX*32)+16+12+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L277">                    pApplet.line((towerX*32)+16+12+3, (40+towerY*32)+16+12+4,(towerX*32)+16+12-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L278">                    tower_damage_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L281" title="All 2 branches covered.">                if (tower_firing_speed_grade &gt;= 1) {</span>
+<span class="fc" id="L282">                    pApplet.noFill();</span>
+<span class="fc" id="L283">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L284">                    pApplet.rect((towerX*32)+4, (40+towerY*32)+4, 24, 24);</span>
+<span class="fc" id="L285">                    tower_firing_speed_test = 1;</span>
+                }
+<span class="fc bfc" id="L287" title="All 2 branches covered.">                if (tower_firing_speed_grade &gt;= 2) {</span>
+<span class="fc" id="L288">                    pApplet.noFill();</span>
+<span class="fc" id="L289">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L290">                    pApplet.rect((towerX*32)+3, (40+towerY*32)+3, 26, 26);</span>
+<span class="fc" id="L291">                    tower_firing_speed_test = 2;</span>
+                }
+<span class="fc bfc" id="L293" title="All 2 branches covered.">                if(tower_firing_speed_grade &gt;= 3) {</span>
+<span class="fc" id="L294">                    pApplet.noFill();</span>
+<span class="fc" id="L295">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L296">                    pApplet.rect((towerX*32)+2, (40+towerY*32)+2, 28, 28);</span>
+<span class="fc" id="L297">                    tower_firing_speed_test = 3;</span>
+                }
+
+            }
+<span class="pc bpc" id="L301" title="2 of 12 branches missed.">            if ((tower_damage_grade&gt;0 &amp;&amp; tower_firing_speed_grade&gt;0 &amp;&amp; tower_range_grade&gt;0) &amp;&amp; (tower_damage_grade==1 || tower_range_grade==1 || tower_firing_speed_grade==1)){</span>
+<span class="fc" id="L302">                pApplet.image(tower1, towerX*32, 40+towerY*32, 32, 32);</span>
+
+<span class="fc bfc" id="L304" title="All 2 branches covered.">                if (tower_range_grade &gt;= 2) {</span>
+<span class="fc" id="L305">                    pApplet.noFill();</span>
+<span class="fc" id="L306">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L307">                    pApplet.ellipse((towerX*32)+16-12, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L308">                    pApplet.noStroke();</span>
+<span class="fc" id="L309">                    tower_range_test = 2;</span>
+                }
+<span class="fc bfc" id="L311" title="All 2 branches covered.">                if (tower_range_grade &gt;= 3) {</span>
+<span class="fc" id="L312">                    pApplet.noFill();</span>
+<span class="fc" id="L313">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L314">                    pApplet.ellipse((towerX*32)+16, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L315">                    pApplet.noStroke();</span>
+<span class="fc" id="L316">                    tower_range_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L319" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 2) {</span>
+<span class="fc" id="L320">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L321">                    pApplet.line((towerX*32)+16-12-3, (40+towerY*32)+16+12-4, (towerX*32)+16-12+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L322">                    pApplet.line((towerX*32)+16-12+3, (40+towerY*32)+16+12+4, (towerX*32)+16-12-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L323">                    tower_damage_test = 2;</span>
+                }
+<span class="fc bfc" id="L325" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 3) {</span>
+<span class="fc" id="L326">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L327">                    pApplet.line((towerX*32)+16-3, (40+towerY*32)+16+12-4, (towerX*32)+16+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L328">                    pApplet.line((towerX*32)+16+3, (40+towerY*32)+16+12+4, (towerX*32)+16+-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L329">                    tower_damage_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L332" title="All 2 branches covered.">                if (tower_firing_speed_grade &gt;= 2) {</span>
+<span class="fc" id="L333">                    pApplet.noFill();</span>
+<span class="fc" id="L334">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L335">                    pApplet.rect((towerX*32)+4, (40+towerY*32)+4, 24, 24);</span>
+<span class="fc" id="L336">                    tower_firing_speed_test = 2;</span>
+                }
+<span class="fc bfc" id="L338" title="All 2 branches covered.">                if (tower_firing_speed_grade &gt;= 3) {</span>
+<span class="fc" id="L339">                    pApplet.noFill();</span>
+<span class="fc" id="L340">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L341">                    pApplet.rect((towerX*32)+3, (40+towerY*32)+3, 26, 26);</span>
+<span class="fc" id="L342">                    tower_firing_speed_test = 3;</span>
+                }
+
+            }
+
+<span class="pc bpc" id="L347" title="1 of 6 branches missed.">            if (tower_damage_grade&gt;1 &amp;&amp; tower_firing_speed_grade&gt;1 &amp;&amp; tower_range_grade&gt;1) {</span>
+<span class="fc" id="L348">                pApplet.image(tower2, towerX*32, 40+towerY*32, 32, 32);</span>
+<span class="fc bfc" id="L349" title="All 2 branches covered.">                if (tower_range_grade &gt;= 3) {</span>
+<span class="fc" id="L350">                    pApplet.noFill();</span>
+<span class="fc" id="L351">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L352">                    pApplet.ellipse((towerX*32)+16-12, (40+towerY*32)+16-12, 5, 5);</span>
+<span class="fc" id="L353">                    pApplet.noStroke();</span>
+<span class="fc" id="L354">                    tower_range_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L357" title="All 2 branches covered.">                if (tower_damage_grade &gt;= 3) {</span>
+<span class="fc" id="L358">                    pApplet.stroke(138,43,226);</span>
+<span class="fc" id="L359">                    pApplet.line((towerX*32)+16-12-3, (40+towerY*32)+16+12-4, (towerX*32)+16-12+3, (40+towerY*32)+16+12+4);</span>
+<span class="fc" id="L360">                    pApplet.line((towerX*32)+16-12+3, (40+towerY*32)+16+12+4, (towerX*32)+16-12-3, (40+towerY*32)+16+12-4);</span>
+<span class="fc" id="L361">                    tower_damage_test = 3;</span>
+                }
+
+<span class="fc bfc" id="L364" title="All 2 branches covered.">                if (tower_firing_speed_grade &gt;= 3) {</span>
+<span class="fc" id="L365">                    pApplet.noFill();</span>
+<span class="fc" id="L366">                    pApplet.stroke(135,206,250);</span>
+<span class="fc" id="L367">                    pApplet.rect((towerX*32)+4, (40+towerY*32)+4, 24, 24);</span>
+<span class="fc" id="L368">                    tower_firing_speed_test = 3;</span>
+                }
+            }
+
+<span class="fc bfc" id="L372" title="All 2 branches covered.">            if (freezing == true) {</span>
+<span class="fc" id="L373">                pApplet.fill(30,144,255);</span>
+<span class="fc" id="L374">                pApplet.ellipse((towerX*32)+16, (40+towerY*32)+16, 10, 10);</span>
+            }
+            //begin to display the fireballs
+<span class="pc bpc" id="L377" title="1 of 2 branches missed.">            if (!pressed_pause_button){</span>
+<span class="fc" id="L378">                fire(pressed_speed_up_button);</span>
+            }
+<span class="pc bpc" id="L380" title="1 of 2 branches missed.">            if (fireballs != null) {</span>
+<span class="fc bfc" id="L381" title="All 2 branches covered.">                for (int i=0; i&lt;fireballs.size(); i++) {</span>
+<span class="fc" id="L382">                    fireballs.get(i).drawFireball();</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">                    if (fireballs.get(i).reachDestination){</span>
+<span class="fc" id="L384">                        fireballs.remove(i);</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L389">    }</span>
+
+    public void display_tower_range() {
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        if (canBuild) {</span>
+<span class="fc" id="L393">            pApplet.noFill();</span>
+<span class="fc" id="L394">            pApplet.stroke(255,255,0);</span>
+<span class="fc" id="L395">            pApplet.ellipse((towerX*32)+16, (40+towerY*32)+16, tower_range, tower_range);</span>
+<span class="fc" id="L396">            tower_display_range_test = true;</span>
+        }
+<span class="fc" id="L398">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

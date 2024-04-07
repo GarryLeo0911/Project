@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Fireball.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">info1113's assignment</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Fireball.java</span></div><h1>Fireball.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+
+public class Fireball extends Tower{
+    int damage;
+    boolean freezing_ball;
+
+    //variable represent the fireball's location
+    int fireballX;
+    int fireballY;
+
+    //variable represent the fireball's made location
+    int fireballMadeX;
+    int fireballMadeY;
+    
+    //variable represent the fireball's destination
+    float fireballDestinationX;
+    float fireballDestinationY;
+
+    //variable represent whether 
+
+    //variable represent whether the fireball reach the destination
+    boolean reachDestination;
+
+    //initiate the fireball's image
+    PImage fireball;
+
+
+    public Fireball(JSONObject jsonObject, App app, PApplet pApplet, int towerX, int towerY, Monster monster) {
+<span class="fc" id="L33">        super(jsonObject, app, pApplet, towerX, towerY);</span>
+<span class="fc" id="L34">        fireballMadeX = towerX;</span>
+<span class="fc" id="L35">        fireballMadeY = towerY;</span>
+<span class="fc" id="L36">        reachDestination = false;</span>
+
+        //initiate the fireball's location
+<span class="fc" id="L39">        fireballX = (fireballMadeX*32)+16;</span>
+<span class="fc" id="L40">        fireballY = (fireballMadeY*32)+56;</span>
+
+        //get the destination coordinate
+<span class="fc" id="L43">        fireballDestinationX = ((monster.getMonsterX())*32)+16;</span>
+<span class="fc" id="L44">        fireballDestinationY = ((monster.getMonsterY())*32)+56;</span>
+
+        //get the fireball's damage
+<span class="fc" id="L47">        damage = getTower_damage();</span>
+<span class="fc" id="L48">        freezing_ball = getFreezing();</span>
+
+        //get the fireball's image
+<span class="fc" id="L51">        fireball = app.fireball;</span>
+<span class="fc" id="L52">    }</span>
+
+
+    //update the fireball's location
+    public void updateFireballLocation(){
+        //calculate the distance between the fireball and the destination
+<span class="fc" id="L58">        float dx = fireballDestinationX - fireballX;</span>
+<span class="fc" id="L59">        float dy = fireballDestinationY - fireballY;</span>
+<span class="fc" id="L60">        float distance = (float) Math.sqrt(dx * dx + dy * dy);</span>
+
+        //if the fireball reach the destination, set the reachDestination to true
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (distance &lt; 16){</span>
+<span class="fc" id="L64">            reachDestination = true;</span>
+        } else {
+            //calculate the fireball's speed
+<span class="fc" id="L67">            float speed = 4;</span>
+            //calculate the fireball's moving distance
+<span class="fc" id="L69">            float moveDistance = speed / distance;</span>
+            //calculate the fireball's moving direction
+<span class="fc" id="L71">            float xMove = moveDistance * dx;</span>
+<span class="fc" id="L72">            float yMove = moveDistance * dy;</span>
+            //update the fireball's location
+<span class="fc" id="L74">            fireballX += xMove;</span>
+<span class="fc" id="L75">            fireballY += yMove;</span>
+        }
+<span class="fc" id="L77">    }</span>
+
+    //draw the fireball
+    public void drawFireball(){
+<span class="fc" id="L81">        updateFireballLocation();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (reachDestination == false){</span>
+<span class="fc" id="L83">            pApplet.image(fireball, fireballX, fireballY, 10, 10);</span>
+        }
+<span class="fc" id="L85">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
